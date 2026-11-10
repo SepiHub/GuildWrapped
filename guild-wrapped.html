@@ -1,0 +1,1031 @@
+<title>Guild Wrapped</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Figtree:wght@400;500;600;700&family=Cinzel:wght@600;700&family=Baloo+2:wght@600;700;800&display=swap">
+<style id="gw-style">
+/* Layout: a poster wall of character cards; a card opens a full-screen story, one stat per slide, then the next guildmate.
+   One deliberate dark look: the guild addon's plum windows, pink titles and pastel rainbow rule. */
+:root {
+  color-scheme: dark;
+  --bg: #15121B;
+  --night: #0D0B11;
+  --surface: #2B2235;
+  --chip: #2A2433;
+  --line: #3A3245;
+  --text: #EDE6F2;
+  --muted: #A79DB3;
+  --pink: #F9B8D4;
+  --peach: #FFC891;
+  --butter: #FFF1A8;
+  --mint: #BDE3A3;
+  --sky: #A8D8F0;
+  --lilac: #C9B6F2;
+  --danger: #FF9AA2;
+  --veil: rgba(13, 11, 17, 0.78);
+  --glass: rgba(21, 18, 27, 0.6);
+  --shade: rgba(21, 18, 27, 0.96);
+  --track: rgba(237, 230, 242, 0.22);
+  --rainbow: linear-gradient(90deg, var(--pink), var(--peach), var(--butter), var(--mint), var(--sky), var(--lilac));
+  --f-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+html { background: var(--bg); }
+body { background: var(--bg); color: var(--text); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+
+.wrap {
+  max-width: 1120px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 72px;
+  display: grid; gap: 28px;
+}
+
+/* Header */
+.top { display: grid; gap: 12px; }
+.eyebrow-row { display: flex; align-items: center; gap: 8px; color: var(--pink); font-weight: 600; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+.paw { width: 18px; height: 18px; flex: none; }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: clamp(38px, 8vw, 72px); line-height: 1; letter-spacing: -0.02em; text-wrap: balance; }
+h1 .w { background: var(--rainbow); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lede { margin: 0; color: var(--muted); max-width: 60ch; font-size: 16px; }
+.rule { height: 3px; border-radius: 3px; background: var(--rainbow); max-width: 320px; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.count { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.admin { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.storage { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.note { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); font-size: 14px; }
+.note p { margin: 0; flex: 1 1 280px; min-width: 0; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--chip); color: var(--text); font-weight: 600; font-size: 14px; line-height: 1.2; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--pink); border-color: var(--pink); color: var(--surface); }
+.btn.primary:hover { filter: brightness(1.05); }
+.btn.danger { color: var(--danger); }
+.btn.ghost { background: transparent; }
+.btn[disabled] { opacity: 0.5; cursor: default; }
+.icon-btn { width: 36px; height: 36px; display: inline-grid; place-items: center; border-radius: 50%; border: 0; background: var(--glass); color: var(--text); font-size: 16px; line-height: 1; }
+
+/* Gallery */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 16px; }
+.card-wrap { position: relative; }
+.card { position: relative; display: block; width: 100%; aspect-ratio: 3 / 4; max-width: 100%; border: 1px solid var(--t-edge); border-radius: 18px; overflow: hidden; background: var(--surface); color: var(--text); text-align: left; box-shadow: 0 10px 30px var(--t-glow); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.card-wrap:hover .card { transform: translateY(-3px); box-shadow: 0 14px 38px var(--t-glow), 0 0 0 1px var(--t-edge); }
+.card .tint { position: absolute; inset: 0; background: var(--t-tint); pointer-events: none; }
+.card .shade { position: absolute; inset: 0; background: linear-gradient(to top, var(--t-shade) 0%, var(--t-shade-mid) 40%, transparent 66%); pointer-events: none; }
+.card .info { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px; display: grid; gap: 6px; pointer-events: none; z-index: 1; }
+.card .name { font-family: var(--t-font); font-weight: 700; font-size: 17px; line-height: 1.15; text-wrap: balance; overflow-wrap: anywhere; }
+.card .orn { width: 44px; height: 2px; border-radius: 2px; background: var(--t-rule); }
+.card-hit { position: absolute; inset: 0; z-index: 2; padding: 0; border: 0; border-radius: inherit; background: transparent; touch-action: pan-y; }
+.card-hit:focus-visible { outline: 2px solid var(--a1); outline-offset: -3px; }
+
+/* Image carousel (cards and the story intro): arrows, dots, swipe */
+.car { position: absolute; inset: 0; overflow: hidden; }
+.car-track { display: flex; height: 100%; transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.car-track img { flex: 0 0 100%; width: 100%; height: 100%; max-width: none; object-fit: cover; user-select: none; -webkit-user-drag: none; }
+.car-arrow { position: absolute; top: 50%; z-index: 3; width: 30px; height: 30px; margin-top: -15px; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--glass); color: var(--text); font-size: 20px; line-height: 1; padding: 0 0 2px; }
+.car-arrow.prev { left: 8px; }
+.car-arrow.next { right: 8px; }
+.car-arrow:hover { background: var(--veil); }
+.car-dots { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 3; display: flex; gap: 5px; pointer-events: none; }
+.car-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--track); }
+.car-dots i.on { background: var(--text); }
+@media (prefers-reduced-motion: reduce) { .car-track { transition: none; } }
+.card .sub { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13px; }
+.card .lvl { color: var(--cc); font-weight: 700; font-variant-numeric: tabular-nums; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cc); flex: none; }
+.profs { display: flex; flex-wrap: wrap; gap: 4px; }
+.profs span { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--t-chip); border: 1px solid var(--t-edge); }
+.pill { position: absolute; top: 10px; z-index: 3; pointer-events: none; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+.pill.example { left: 10px; background: var(--butter); color: var(--surface); }
+.pill.clips { right: 10px; background: var(--glass); color: var(--text); border: 1px solid var(--line); }
+.edit-btn { position: absolute; right: 10px; bottom: 10px; z-index: 4; padding: 5px 11px; font-size: 12px; }
+.card-wrap.editable .card .info { padding-bottom: 46px; }
+.empty { padding: 48px 20px; border: 1px dashed var(--line); border-radius: 18px; text-align: center; color: var(--muted); display: grid; gap: 8px; justify-items: center; }
+.empty b { color: var(--text); font-size: 17px; }
+
+/* Story */
+.story { position: fixed; inset: 0; z-index: 50; background: var(--night); display: grid; place-items: center;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+.story-bg { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; filter: blur(38px) saturate(1.15) brightness(0.32); transform: scale(1.15); }
+.frame { position: relative; width: min(100%, 440px); height: min(100%, 820px); display: flex; flex-direction: column; background: var(--t-shade-mid); border: 1px solid var(--t-edge); border-radius: 22px; overflow: hidden; box-shadow: 0 0 60px var(--t-glow); }
+@media (max-width: 480px) { .frame { border-radius: 0; border: 0; height: 100%; } }
+.bars { display: flex; gap: 4px; padding: 12px 14px 0; }
+.bar { flex: 1; height: 3px; border-radius: 2px; background: var(--track); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--text); }
+.story-head { display: flex; align-items: center; gap: 10px; padding: 10px 12px 6px 14px; }
+.av { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex: none; border: 1px solid var(--line); }
+.who { flex: 1; min-width: 0; display: grid; line-height: 1.25; }
+.who b { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.who small { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.host { position: relative; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.tap { position: absolute; top: 0; bottom: 0; border: 0; background: transparent; padding: 0; z-index: 1; }
+.tap.prev { left: 0; width: 32%; }
+.tap.next { right: 0; width: 68%; }
+.tap:focus-visible { outline-offset: -4px; }
+.host.no-tap .tap { display: none; }
+.story-foot { display: flex; justify-content: space-between; gap: 8px; padding: 8px 14px 14px; }
+.story-foot .btn { min-width: 0; max-width: 48%; }
+.story-foot .btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.slide { min-height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 18px 26px 26px; }
+.slide > * { animation: rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.slide > *:nth-child(2) { animation-delay: 0.08s; }
+.slide > *:nth-child(3) { animation-delay: 0.16s; }
+.slide > *:nth-child(4) { animation-delay: 0.24s; }
+.slide > *:nth-child(5) { animation-delay: 0.32s; }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .slide > * { animation: none; } .card { transition: none; } .card-wrap:hover .card { transform: none; } }
+.kicker { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--acc); }
+.big { font-family: var(--t-font); font-weight: 800; font-size: clamp(54px, 16vw, 100px); line-height: 0.95; letter-spacing: -0.03em; color: var(--acc); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.big.mid { font-size: clamp(40px, 11vw, 64px); }
+.cap { font-size: 19px; font-weight: 600; text-wrap: balance; }
+.line { color: var(--muted); font-size: 15px; max-width: 34ch; }
+.line strong { color: var(--text); }
+.quad { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 14px; }
+.quad div { display: grid; gap: 2px; min-width: 0; }
+.quad b { font-family: var(--t-font); font-weight: 700; font-size: clamp(28px, 8vw, 40px); line-height: 1; color: var(--acc); font-variant-numeric: tabular-nums; }
+.quad span { color: var(--muted); font-size: 13px; }
+.intro-car { position: relative; z-index: 2; width: 100%; height: min(42vh, 420px); border-radius: 18px; overflow: hidden; border: 1px solid var(--t-edge); flex: none; }
+.intro-name { font-family: var(--t-font); font-weight: 800; font-size: clamp(26px, 7vw, 34px); line-height: 1.1; text-wrap: balance; overflow-wrap: anywhere; }
+.skills { display: grid; gap: 12px; }
+.skill { display: grid; gap: 5px; }
+.skill-top { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; }
+.skill-top span:last-child { color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 500; }
+.track { height: 8px; border-radius: 6px; background: var(--track); overflow: hidden; }
+.track i { display: block; height: 100%; border-radius: 6px; background: var(--acc); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips span { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--t-edge); background: var(--t-chip); font-weight: 600; font-size: 14px; }
+.clips-list { display: grid; gap: 14px; }
+.clip { margin: 0; display: grid; gap: 6px; }
+.clip video { width: 100%; max-height: 34vh; border-radius: 14px; background: var(--night); border: 1px solid var(--line); }
+.clip figcaption { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; }
+.clip figcaption span { color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; flex: none; }
+.outro-card { width: min(100%, 230px); align-self: center; pointer-events: none; }
+
+/* Editor */
+.modal { position: fixed; inset: 0; z-index: 60; background: var(--veil); display: grid; place-items: center;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.sheet { width: min(100%, 580px); max-height: 100%; overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px; display: grid; gap: 18px; }
+.sheet h2 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 22px; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.lbl { font-weight: 700; font-size: 14px; }
+.hint { color: var(--muted); font-size: 13px; }
+.hint code { font-family: var(--f-mono); font-size: 12px; color: var(--text); }
+textarea, input[type="text"], select { width: 100%; box-sizing: border-box; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+textarea { font-family: var(--f-mono); font-size: 12px; min-height: 84px; resize: vertical; word-break: break-all; }
+input[type="file"] { width: 100%; font-size: 13px; color: var(--muted); }
+.status { font-size: 13px; min-height: 1.4em; }
+.status.ok { color: var(--mint); }
+.status.err { color: var(--danger); }
+.arts { display: flex; flex-wrap: wrap; gap: 10px; }
+.art-th { position: relative; width: 78px; display: grid; gap: 4px; }
+.art-th img { width: 78px; height: 104px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); }
+.art-th .cover { position: absolute; top: 4px; left: 4px; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--butter); color: var(--surface); }
+.art-th .row { display: flex; gap: 4px; }
+.mini { flex: 1; padding: 3px 0; border-radius: 8px; border: 1px solid var(--line); background: var(--chip); color: var(--text); font-size: 12px; line-height: 1.2; }
+.mini[disabled] { opacity: 0.4; cursor: default; }
+.look { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+.look-prev { width: min(100%, 190px); flex: none; pointer-events: none; }
+.themes { flex: 1 1 240px; min-width: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+.theme-opt { display: grid; gap: 5px; padding: 9px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text); text-align: left; }
+.theme-opt[aria-pressed="true"] { border-color: var(--a1); box-shadow: 0 0 0 1px var(--a1), 0 6px 18px var(--t-glow); }
+.theme-opt .sw { height: 8px; border-radius: 6px; background: var(--t-rule); }
+.theme-opt b { font-family: var(--t-font); font-size: 14px; line-height: 1.1; }
+.theme-opt span { font-size: 11px; color: var(--muted); line-height: 1.3; }
+.slots { display: grid; gap: 10px; }
+.slot { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--chip); }
+.slot-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.slot-row video { width: 96px; height: 54px; object-fit: cover; border-radius: 8px; background: var(--night); flex: none; }
+.slot-row .grow { flex: 1 1 160px; min-width: 0; }
+.slot-title { font-weight: 600; font-size: 13px; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; align-items: center; }
+.actions .spacer { flex: 1; }
+.confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--danger); color: var(--danger); font-size: 14px; }
+
+/* Card themes: each sets accents (--a1..--a6), card edge and glow, image tint, shading, chips, rule and name font. */
+.t-guild { --a1: #F9B8D4; --a2: #FFC891; --a3: #FFF1A8; --a4: #BDE3A3; --a5: #A8D8F0; --a6: #C9B6F2; --t-edge: #3A3245; --t-glow: rgba(249, 184, 212, 0.12); --t-tint: transparent; --t-shade: rgba(21, 18, 27, 0.96); --t-shade-mid: rgba(21, 18, 27, 0.55); --t-chip: rgba(21, 18, 27, 0.6); --t-rule: linear-gradient(90deg, #F9B8D4, #FFC891, #FFF1A8, #BDE3A3, #A8D8F0, #C9B6F2); --t-font: var(--f-display); }
+.t-fiery { --a1: #FFB45E; --a2: #FF7A45; --a3: #FFD27A; --a4: #FF9A6B; --a5: #FFC48A; --a6: #FF6B5A; --t-edge: #7A2E1C; --t-glow: rgba(255, 110, 50, 0.32); --t-tint: rgba(255, 90, 30, 0.14); --t-shade: rgba(35, 10, 6, 0.97); --t-shade-mid: rgba(60, 16, 8, 0.58); --t-chip: rgba(60, 18, 10, 0.75); --t-rule: linear-gradient(90deg, #FF6B3D, #FFB45E, #FFE08A); --t-font: var(--f-display); }
+.t-twilight { --a1: #C9B6F2; --a2: #9FA8FF; --a3: #F4B8E8; --a4: #8FD3FF; --a5: #E6D3FF; --a6: #B79CFF; --t-edge: #4A3A78; --t-glow: rgba(150, 120, 255, 0.3); --t-tint: rgba(80, 60, 200, 0.16); --t-shade: rgba(18, 14, 40, 0.97); --t-shade-mid: rgba(30, 22, 70, 0.58); --t-chip: rgba(30, 22, 70, 0.72); --t-rule: linear-gradient(90deg, #6E5BD9, #C9B6F2, #F4B8E8); --t-font: var(--f-display); }
+.t-medieval { --a1: #E8C77A; --a2: #D8A86A; --a3: #E3D2A8; --a4: #B8C49A; --a5: #F0DDAF; --a6: #C98B5B; --t-edge: #6B5326; --t-glow: rgba(232, 199, 122, 0.2); --t-tint: rgba(150, 110, 40, 0.16); --t-shade: rgba(26, 20, 12, 0.97); --t-shade-mid: rgba(45, 34, 18, 0.6); --t-chip: rgba(45, 34, 18, 0.78); --t-rule: linear-gradient(90deg, #8A6A2E, #E8C77A, #8A6A2E); --t-font: "Cinzel", Georgia, "Times New Roman", serif; }
+.t-cute { --a1: #FFB8D9; --a2: #FFD6A5; --a3: #FDFFB6; --a4: #CAFFBF; --a5: #A0E7FF; --a6: #D7C4FF; --t-edge: #C97FA6; --t-glow: rgba(255, 184, 217, 0.32); --t-tint: rgba(255, 170, 210, 0.14); --t-shade: rgba(52, 24, 44, 0.95); --t-shade-mid: rgba(70, 30, 60, 0.5); --t-chip: rgba(70, 30, 60, 0.72); --t-rule: linear-gradient(90deg, #FFB8D9, #FDFFB6, #A0E7FF); --t-font: "Baloo 2", "Trebuchet MS", system-ui, sans-serif; }
+.t-frost { --a1: #BDEBFF; --a2: #8FD3FF; --a3: #E6F7FF; --a4: #A8E6E0; --a5: #CFE3FF; --a6: #9CC9FF; --t-edge: #3E6A8A; --t-glow: rgba(150, 220, 255, 0.28); --t-tint: rgba(120, 200, 255, 0.14); --t-shade: rgba(10, 22, 34, 0.97); --t-shade-mid: rgba(16, 40, 60, 0.58); --t-chip: rgba(16, 40, 60, 0.72); --t-rule: linear-gradient(90deg, #8FD3FF, #E6F7FF, #8FD3FF); --t-font: var(--f-display); }
+.t-grove { --a1: #BDE3A3; --a2: #8FD694; --a3: #E3F2B6; --a4: #9DD6C2; --a5: #D4E8A5; --a6: #A7C97F; --t-edge: #3E6B3A; --t-glow: rgba(150, 220, 120, 0.22); --t-tint: rgba(100, 180, 80, 0.13); --t-shade: rgba(12, 24, 14, 0.97); --t-shade-mid: rgba(20, 44, 24, 0.58); --t-chip: rgba(20, 44, 24, 0.72); --t-rule: linear-gradient(90deg, #5E9E4F, #BDE3A3, #E3F2B6); --t-font: var(--f-display); }
+.t-arcane { --a1: #8FE9FF; --a2: #C58BFF; --a3: #7AF5E1; --a4: #B4A0FF; --a5: #FF8BEA; --a6: #9ED8FF; --t-edge: #5A3FA8; --t-glow: rgba(160, 110, 255, 0.38); --t-tint: rgba(130, 80, 255, 0.16); --t-shade: rgba(14, 10, 36, 0.97); --t-shade-mid: rgba(30, 18, 80, 0.58); --t-chip: rgba(30, 18, 80, 0.72); --t-rule: linear-gradient(90deg, #7AF5E1, #C58BFF, #FF8BEA); --t-font: var(--f-display); }
+.t-fel { --a1: #A6FF6B; --a2: #6BFF9E; --a3: #D4FF8A; --a4: #8AF2C0; --a5: #C8FF5A; --a6: #7CE07C; --t-edge: #2F6B1E; --t-glow: rgba(130, 255, 80, 0.28); --t-tint: rgba(100, 255, 60, 0.12); --t-shade: rgba(10, 18, 8, 0.97); --t-shade-mid: rgba(20, 40, 12, 0.58); --t-chip: rgba(20, 40, 12, 0.76); --t-rule: linear-gradient(90deg, #3FAF2F, #A6FF6B, #3FAF2F); --t-font: var(--f-display); }
+.t-celestial { --a1: #FFE29A; --a2: #FFF3C4; --a3: #F6C77A; --a4: #C9D8FF; --a5: #FFD9A8; --a6: #E8EEFF; --t-edge: #6B5A2A; --t-glow: rgba(255, 226, 154, 0.28); --t-tint: rgba(255, 220, 140, 0.1); --t-shade: rgba(10, 14, 32, 0.97); --t-shade-mid: rgba(18, 26, 60, 0.58); --t-chip: rgba(18, 26, 60, 0.72); --t-rule: linear-gradient(90deg, #F6C77A, #FFF3C4, #C9D8FF); --t-font: "Cinzel", Georgia, "Times New Roman", serif; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 70; max-width: min(92vw, 520px); padding: 12px 18px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); font-weight: 600; }
+.toast.err { border-color: var(--danger); color: var(--danger); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+<div id="root"></div>
+<script type="application/json" id="gw-data">{"v":1,"chars":[{"id":"cmossbelly","sample":true,"name":"Mossbelly","sn":"Thornpaw","cls":"DRUID","race":"Tauren","lvl":60,"fac":"Horde","theme":"grove","arts":[{"gen":1},{"gen":2},{"gen":3}],"prof":[["Herbalism",300,300],["Alchemy",285,300],["Fishing",210,300],["Cooking",150,300]],"tal":[["Balance",0],["Feral Combat",31],["Restoration",20]],"att":["Molten Core","Onyxia's Lair"],"st":{"quests":612,"kills":4812,"deaths":37,"dungeons":58,"bosses":211,"flights":143,"hearths":96,"sessions":88,"longestSession":22140,"fish":41,"skillUps":612,"explore":184300,"epics":6,"rares":39,"bestXph":41200,"firstEpic":"Mantle of the Thornwood","firstEpicAt":1754000000,"since":1748000000,"gold":18400000},"clips":[],"added":1762750000},{"id":"cvesper","sample":true,"name":"Vesper","sn":"Ashgrave","cls":"MAGE","race":"Undead","lvl":52,"fac":"Horde","theme":"arcane","arts":[{"gen":1},{"gen":2}],"prof":[["Tailoring",240,300],["Enchanting",225,300]],"tal":[["Arcane",21],["Fire",0],["Frost",30]],"att":[],"st":{"quests":344,"kills":2290,"deaths":71,"dungeons":19,"bosses":64,"flights":88,"hearths":52,"sessions":41,"longestSession":13200,"fish":0,"skillUps":465,"explore":96500,"epics":0,"rares":17,"bestXph":36800,"since":1752000000},"clips":[],"added":1762750001}]}</script>
+<script id="gw-app">
+(function () {
+  "use strict";
+
+  // ---------- data ----------
+  var FONT_LINK = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Figtree:wght@400;500;600;700&family=Cinzel:wght@600;700&family=Baloo+2:wght@600;700;800&display=swap">';
+  var DATA;
+  try { DATA = JSON.parse(document.getElementById("gw-data").textContent); } catch (e) { DATA = null; }
+  if (!DATA || typeof DATA !== "object") DATA = { v: 1, chars: [] };
+  if (!Array.isArray(DATA.chars)) DATA.chars = [];
+  var STYLE_SRC = document.getElementById("gw-style").textContent;
+  var APP_SRC = document.getElementById("gw-app").textContent;
+
+  var MAX_CLIPS = 3, MAX_CLIP_SECONDS = 120, MAX_BYTES = 20 * 1024 * 1024;
+  var SLIDE_MS = 6500;
+  var YEAR = new Date().getFullYear();
+  var SECONDARY = { "Cooking": 1, "Fishing": 1, "First Aid": 1, "Poisons": 1 };
+  var CLASSES = {
+    WARRIOR: ["Warrior", "#C69B6D"], PALADIN: ["Paladin", "#F48CBA"], HUNTER: ["Hunter", "#AAD372"],
+    ROGUE: ["Rogue", "#FFF468"], PRIEST: ["Priest", "#FFFFFF"], SHAMAN: ["Shaman", "#2F8FFF"],
+    MAGE: ["Mage", "#3FC7EB"], WARLOCK: ["Warlock", "#8788EE"], DRUID: ["Druid", "#FF7C0A"]
+  };
+  var MAX_ARTS = 6;
+  var THEMES = [
+    ["guild", "Guild", "Pastel rainbow, the house look"],
+    ["fiery", "Fiery", "Embers, molten orange"],
+    ["twilight", "Twilight", "Dusk violet and starlight"],
+    ["medieval", "Medieval", "Old gold and engraved type"],
+    ["cute", "Cute", "Candy pastels, round letters"],
+    ["frost", "Frost", "Glacier blue and ice"],
+    ["grove", "Grove", "Moss, leaves, druid green"],
+    ["arcane", "Arcane", "Electric violet and teal"],
+    ["fel", "Fel", "Toxic green flame"],
+    ["celestial", "Celestial", "Starlit navy and gold"]
+  ];
+  function themeKey(c) { var k = c && c.theme; return THEMES.some(function (t) { return t[0] === k; }) ? k : "guild"; }
+  var PAW = '<svg class="paw" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><ellipse cx="12" cy="16" rx="5.2" ry="4.4"/><ellipse cx="5.6" cy="10.4" rx="2.1" ry="2.6"/><ellipse cx="9.3" cy="6.6" rx="2.1" ry="2.7"/><ellipse cx="14.7" cy="6.6" rx="2.1" ry="2.7"/><ellipse cx="18.4" cy="10.4" rx="2.1" ry="2.6"/></g></svg>';
+
+  // ---------- helpers ----------
+  function h(tag, props) {
+    var el = document.createElement(tag);
+    if (props) for (var k in props) {
+      var v = props[k];
+      if (v == null || v === false) continue;
+      if (k === "class") el.className = v;
+      else if (k === "text") el.textContent = v;
+      else if (k === "style") el.setAttribute("style", v);
+      else if (k.slice(0, 2) === "on") el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? "" : v);
+    }
+    for (var i = 2; i < arguments.length; i++) add(el, arguments[i]);
+    return el;
+  }
+  function add(el, kid) {
+    if (kid == null || kid === false) return;
+    if (Array.isArray(kid)) { kid.forEach(function (k) { add(el, k); }); return; }
+    el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  }
+  function num(v) { return typeof v === "number" && isFinite(v) ? v : 0; }
+  function fmt(v) { return Math.round(num(v)).toLocaleString("en-US"); }
+  function plural(n, one, many) { return fmt(n) + " " + (Math.round(num(n)) === 1 ? one : many); }
+  function duration(sec) {
+    sec = Math.round(num(sec)); var hh = Math.floor(sec / 3600), mm = Math.floor((sec % 3600) / 60);
+    return hh > 0 ? hh + "h " + mm + "m" : mm + "m";
+  }
+  function clipTime(sec) { sec = Math.round(num(sec)); return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0"); }
+  function day(ts) { return ts ? new Date(ts * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : ""; }
+  function gold(copper) { return fmt(Math.floor(num(copper) / 10000)) + "g"; }
+  function classInfo(cls) {
+    var key = String(cls || "").toUpperCase().replace(/[^A-Z]/g, "");
+    return CLASSES[key] || [cls ? String(cls) : "Adventurer", "#F9B8D4"];
+  }
+  function fullName(c) { return c.sn ? c.name + " " + c.sn : c.name; }
+  function metaLine(c) {
+    return ["Level " + (c.lvl || "?"), c.race, classInfo(c.cls)[0]].filter(Boolean).join(" ");
+  }
+  function mainProfs(c) {
+    return (Array.isArray(c.prof) ? c.prof : []).filter(function (p) { return Array.isArray(p) && p[0] && !SECONDARY[p[0]]; }).slice(0, 2);
+  }
+  function stats(c) { return c.st && typeof c.st === "object" && !c.st.off ? c.st : null; }
+  function newId() { return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  function hashStr(s) { var x = 2166136261; for (var i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
+  function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  // Placeholder art for the example cards: a night landscape tinted with the class color.
+  function genArt(c, k) {
+    var col = classInfo(c.cls)[1], r = rng(hashStr((c.name || "x") + ":" + (k || 1)));
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#15121B"/><stop offset=".55" stop-color="' + col + '" stop-opacity=".55"/><stop offset="1" stop-color="#2B2235"/></linearGradient></defs>' +
+      '<rect width="300" height="400" fill="#2B2235"/><rect width="300" height="400" fill="url(#g)"/>';
+    for (var i = 0; i < 40; i++) s += '<circle cx="' + (r() * 300).toFixed(1) + '" cy="' + (r() * 200).toFixed(1) + '" r="' + (r() * 1.3 + 0.3).toFixed(2) + '" fill="#EDE6F2" fill-opacity="' + (r() * 0.6 + 0.2).toFixed(2) + '"/>';
+    s += '<circle cx="' + (60 + r() * 180).toFixed(0) + '" cy="' + (70 + r() * 50).toFixed(0) + '" r="34" fill="#FFF1A8" fill-opacity=".9"/>';
+    var layers = [["#3A3245", 0.95, 210], ["#2A2433", 1, 255], ["#15121B", 1, 305]];
+    layers.forEach(function (L) {
+      var pts = "0,400 0," + L[2], x = 0;
+      while (x < 300) { x += 30 + r() * 40; pts += " " + Math.min(300, x).toFixed(0) + "," + (L[2] - 20 - r() * 70).toFixed(0); }
+      pts += " 300," + L[2] + " 300,400";
+      s += '<polygon points="' + pts + '" fill="' + L[0] + '" fill-opacity="' + L[1] + '"/>';
+    });
+    s += '</svg>';
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(s);
+  }
+  // A character's art: c.arts (newest format), or the single c.art of the first version.
+  function artsOf(c) {
+    var list = Array.isArray(c.arts) ? c.arts : (c.art ? [c.art] : []);
+    return list.filter(function (a) { return a && (a.id || a.gen); });
+  }
+  function artSrc(c, a) { return a.id ? "/_blob/" + a.id : genArt(c, a.gen); }
+  function artUrls(c) { return artsOf(c).map(function (a) { return artSrc(c, a); }); }
+  function artUrl(c) { return artUrls(c)[0] || ""; }
+  function clipUrl(clip) { return "/_blob/" + clip.id; }
+  function playable() { return DATA.chars.filter(function (c) { return artUrl(c); }); }
+
+  // Image carousel: arrows, dots and swipe; one image shows no controls.
+  function carousel(urls, opts) {
+    opts = opts || {};
+    var idx = 0, n = urls.length, swiped = false;
+    var track = h("div", { class: "car-track" }, urls.map(function (u, i) {
+      return h("img", { src: u, alt: opts.alt ? opts.alt + (n > 1 ? ", picture " + (i + 1) + " of " + n : "") : "", loading: i ? "lazy" : null, draggable: "false" });
+    }));
+    var live = n > 1 && !opts.still;
+    var dots = n > 1 ? h("div", { class: "car-dots", "aria-hidden": "true" }, urls.map(function () { return h("i"); })) : null;
+    var prev = live ? h("button", { class: "car-arrow prev", type: "button", "aria-label": "Previous picture", onclick: function (e) { e.stopPropagation(); go(idx - 1); } }, "‹") : null;
+    var next = live ? h("button", { class: "car-arrow next", type: "button", "aria-label": "Next picture", onclick: function (e) { e.stopPropagation(); go(idx + 1); } }, "›") : null;
+    var el = h("div", { class: "car" }, track, prev, next, dots);
+    function paint() {
+      track.style.transform = "translateX(" + (-100 * idx) + "%)";
+      if (dots) for (var j = 0; j < dots.children.length; j++) dots.children[j].className = j === idx ? "on" : "";
+    }
+    function go(i) { idx = (i + n) % n; paint(); if (opts.onMove) opts.onMove(idx); }
+    paint();
+    if (live) {
+      var gest = opts.gestureEl || el, sx = null, sy = 0;
+      gest.addEventListener("pointerdown", function (e) { sx = e.clientX; sy = e.clientY; swiped = false; });
+      gest.addEventListener("pointerup", function (e) {
+        if (sx == null) return;
+        var dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { swiped = true; go(idx + (dx < 0 ? 1 : -1)); }
+      });
+      gest.addEventListener("pointercancel", function () { sx = null; });
+    }
+    return { el: el, go: go, wasSwipe: function () { var s = swiped; swiped = false; return s; } };
+  }
+
+  // ---------- export code (GFOA1.<crc32>.<base64 JSON>, from /gf export) ----------
+  var CRC_TABLE = (function () { var t = [], c; for (var n = 0; n < 256; n++) { c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crc32(str) { var c = 0xFFFFFFFF; for (var i = 0; i < str.length; i++) c = CRC_TABLE[(c ^ str.charCodeAt(i)) & 255] ^ (c >>> 8); return ((c ^ 0xFFFFFFFF) >>> 0).toString(16).padStart(8, "0"); }
+  function parseExport(raw) {
+    var s = String(raw || "").replace(/\s+/g, "");
+    if (!s) return null;
+    var m = /^GFOA1\.([0-9a-fA-F]{8})\.([A-Za-z0-9+\/=]+)$/.exec(s);
+    if (!m) throw new Error("That isn't an export code. In game, type /gf export and copy the whole box with Ctrl+A, Ctrl+C.");
+    if (crc32(m[2]) !== m[1].toLowerCase()) throw new Error("The code is incomplete. Copy it again, and if it came in several parts, paste every part in order.");
+    var bin = atob(m[2]), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    var payload = JSON.parse(new TextDecoder("utf-8").decode(bytes));
+    var chars = Array.isArray(payload && payload.chars) ? payload.chars.filter(function (c) { return c && typeof c.n === "string"; }) : [];
+    if (!chars.length) throw new Error("This code has no characters in it.");
+    return { t: payload.t, chars: chars };
+  }
+  function arr(v) { return Array.isArray(v) ? v : []; }
+  function fromExport(e, t) {
+    return {
+      name: e.n, sn: typeof e.sn === "string" ? e.sn : "", cls: e.cls || "", race: e.race || "", lvl: num(e.lvl) || null, fac: e.fac || "",
+      prof: arr(e.prof).filter(Array.isArray), tal: arr(e.tal).filter(Array.isArray), att: arr(e.att).filter(function (a) { return typeof a === "string"; }),
+      st: e.st && typeof e.st === "object" && !e.st.off ? e.st : null, exported: t || null
+    };
+  }
+
+  // ---------- capabilities ----------
+  // Editors (the owner, and guildmates invited by email as Editors) can add characters. Each editor can change the
+  // cards they added; the owner can change every card.
+  var ASSETS = null, ARTIFACT = null, canEdit = false, isOwner = false, myId = null, knowsAccess = false;
+  function connect() {
+    var cl = window.claude;
+    if (!cl || typeof cl.use !== "function") return false;
+    function safe(name) { return cl.use(name).catch(function () { return null; }); }
+    Promise.all([safe("assets"), safe("artifact"), safe("user")])
+      .then(function (r) {
+        ASSETS = r[0]; ARTIFACT = r[1];
+        var user = r[2];
+        return Promise.all([
+          user ? user.isOwner().catch(function () { return false; }) : false,
+          user ? user.id().catch(function () { return null; }) : null
+        ]);
+      })
+      .then(function (u) {
+        isOwner = !!u[0]; myId = u[1] || null;
+        canEdit = !!(ASSETS && ARTIFACT);
+        knowsAccess = true;
+        renderGallery();
+        if (canEdit) refreshStorage();
+      });
+    return true;
+  }
+  function canChange(c) { return canEdit && (isOwner || (!!myId && c.by === myId)); }
+  if (!connect()) {
+    var tries = 0;
+    var iv = setInterval(function () { if (connect() || ++tries > 20) clearInterval(iv); }, 250);
+  }
+  function refreshStorage() {
+    if (!ASSETS || !storageEl) return;
+    ASSETS.list().then(function (res) {
+      var u = res && res.usage; if (!u || !u.maxBytes) return;
+      storageEl.textContent = "Storage " + (u.bytes / 1048576).toFixed(0) + " MB of " + (u.maxBytes / 1048576).toFixed(0) + " MB used";
+    }).catch(function () {});
+  }
+
+  // ---------- saving: the page republishes itself with the new data ----------
+  function buildDocument(data) {
+    var resetEl = document.head && document.head.querySelector("style");
+    var reset = resetEl ? resetEl.textContent : "";
+    var json = JSON.stringify(data).replace(/</g, "\\u003c").split(String.fromCharCode(0x2028)).join("\\u2028").split(String.fromCharCode(0x2029)).join("\\u2029");
+    return '<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>' + reset + '</style></head><body>' +
+      '<title>Guild Wrapped</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n' + FONT_LINK + '\n' +
+      '<style id="gw-style">' + STYLE_SRC + '</style>\n<div id="root"></div>\n' +
+      '<script type="application/json" id="gw-data">' + json + '<\/script>\n' +
+      '<script id="gw-app">' + APP_SRC + '<\/script></body></html>';
+  }
+  function errText(err) {
+    var code = err && err.code;
+    var map = {
+      too_large: "That file is over 20 MB. Export the clip at 720p or trim it, then try again.",
+      unsupported_type: "That file type isn't supported. Use PNG, JPG, WebP or GIF for art, and MP4 or WebM for clips.",
+      quota_or_state: "The page is out of storage space. Remove a clip or character, then try again.",
+      rate_limited: "Too many uploads at once. Wait a minute, then try again.",
+      not_granted: "You can view this page but not edit it.",
+      not_writer: "You can view this page but not edit it.",
+      conflict: "Someone else saved at the same moment. The page is reloading with their version; make your change again after it loads.",
+      upstream_auth: "Your sign-in expired. Reload the page, then try again.",
+      too_large_page: "The page got too big to save."
+    };
+    return map[code] || (err && err.message) || "Saving didn't work. Try again in a moment.";
+  }
+  function publish(data) { return ARTIFACT.publish(buildDocument(data)); }
+  function cleanup(ids) { ids.forEach(function (id) { if (ASSETS && id) ASSETS.delete(id).catch(function () {}); }); }
+
+  // ---------- toast ----------
+  var toastEl = null, toastTimer = 0;
+  function toast(msg, isErr) {
+    if (!toastEl) { toastEl = h("div", { class: "toast", role: "status", "aria-live": "polite" }); document.body.append(toastEl); }
+    toastEl.textContent = msg; toastEl.className = "toast" + (isErr ? " err" : ""); toastEl.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { toastEl.hidden = true; }, isErr ? 7000 : 3500);
+  }
+
+  // ---------- gallery ----------
+  var root = document.getElementById("root"), gridEl, countEl, adminEl, storageEl, noteEl, askEl;
+  // mode: "play" (gallery card that opens the story), "still" (outro, editor preview). urls overrides the art.
+  function cardEl(c, mode, urls) {
+    var ci = classInfo(c.cls);
+    urls = urls || artUrls(c);
+    var hit = mode === "play" ? h("button", { class: "card-hit", type: "button", "aria-label": "Play " + fullName(c) + "'s Guild Wrapped" }) : null;
+    var car = urls.length ? carousel(urls, { still: mode !== "play", gestureEl: hit, alt: "" }) : null;
+    if (hit) hit.addEventListener("click", function () { if (car && car.wasSwipe()) return; openStory(c.id); });
+    var kids = [
+      car ? car.el : null,
+      h("span", { class: "tint" }),
+      h("span", { class: "shade" }),
+      c.sample ? h("span", { class: "pill example", text: "Example" }) : null,
+      c.clips && c.clips.length ? h("span", { class: "pill clips", text: "▶ " + plural(c.clips.length, "clip", "clips") }) : null,
+      h("div", { class: "info" },
+        h("div", { class: "name", text: fullName(c) }),
+        h("div", { class: "orn" }),
+        h("div", { class: "sub" }, h("i", { class: "dot" }), h("span", { class: "lvl", text: c.lvl ? "Lv " + c.lvl : "Lv ?" }), h("span", { text: [c.race, ci[0]].filter(Boolean).join(" ") })),
+        mainProfs(c).length ? h("div", { class: "profs" }, mainProfs(c).map(function (p) { return h("span", { text: p[0] }); })) : null)
+    ];
+    kids.push(hit);
+    return h("div", { class: "card t-" + themeKey(c), style: "--cc:" + ci[1] }, kids);
+  }
+  function renderShell() {
+    root.innerHTML = "";
+    var eyebrow = h("div", { class: "eyebrow-row" }); eyebrow.innerHTML = PAW; eyebrow.append("Gay Furries of Azeroth");
+    countEl = h("span", { class: "count" });
+    storageEl = h("span", { class: "storage" });
+    adminEl = h("div", { class: "admin", hidden: true },
+      h("button", { class: "btn primary", type: "button", onclick: function () { openEditor(null); } }, "+ Add character"),
+      storageEl);
+    noteEl = h("div", { class: "note", hidden: true });
+    askEl = h("span", { class: "count", hidden: true, text: "Want your character in here? Ask the page's owner to invite you as an editor." });
+    gridEl = h("div", { class: "grid" });
+    root.append(h("main", { class: "wrap" },
+      h("header", { class: "top" },
+        eyebrow,
+        h("h1", null, "Guild ", h("span", { class: "w", text: "Wrapped" }), " " + YEAR),
+        h("p", { class: "lede", text: "Every guildmate who sent in art of their character gets a card. Tap one to play their year in the guild, then keep going to the next." }),
+        h("div", { class: "rule" }),
+        h("div", { class: "toolbar" },
+          h("button", { class: "btn", type: "button", onclick: function () { var p = playable(); if (p.length) openStory(p[0].id); } }, "▶ Play everyone"),
+          countEl, adminEl, askEl)),
+      noteEl, gridEl));
+  }
+  function renderGallery() {
+    var chars = DATA.chars, clips = 0;
+    chars.forEach(function (c) { clips += arr(c.clips).length; });
+    countEl.textContent = plural(chars.length, "character", "characters") + " · " + plural(clips, "memory", "memories");
+    adminEl.hidden = !canEdit;
+    askEl.hidden = canEdit || !knowsAccess;
+    gridEl.innerHTML = "";
+    if (!chars.length) {
+      gridEl.append(h("div", { class: "empty", style: "grid-column:1/-1" },
+        h("b", { text: "No characters yet" }),
+        h("span", { text: canEdit ? "Add the first one: paste their /gf export code and upload their art." : "Characters show up here once their art has been added." })));
+    }
+    chars.forEach(function (c) {
+      var mine = canChange(c);
+      var wrap = h("div", { class: "card-wrap" + (mine ? " editable" : "") }, cardEl(c, "play"));
+      if (mine) wrap.append(h("button", { class: "btn edit-btn", type: "button", "aria-label": "Edit " + fullName(c), onclick: function () { openEditor(c.id); } }, "Edit"));
+      gridEl.append(wrap);
+    });
+    var samples = chars.filter(function (c) { return c.sample; });
+    noteEl.hidden = !(isOwner && canEdit && samples.length);
+    if (!noteEl.hidden) {
+      noteEl.innerHTML = "";
+      var confirmBox = null;
+      var removeBtn = h("button", { class: "btn", type: "button", onclick: function () {
+        if (confirmBox) return;
+        confirmBox = h("span", { class: "confirm" }, "Remove both example cards?",
+          h("button", { class: "btn danger", type: "button", onclick: function () {
+            var next = { v: 1, chars: DATA.chars.filter(function (c) { return !c.sample; }) };
+            publish(next).then(function () { toast("Examples removed"); }).catch(function (e) { toast(errText(e), true); });
+          } }, "Remove"),
+          h("button", { class: "btn ghost", type: "button", onclick: function () { confirmBox.remove(); confirmBox = null; } }, "Keep"));
+        noteEl.append(confirmBox);
+      } }, "Remove examples");
+      noteEl.append(h("p", { text: "The cards marked Example are placeholders so you can see how it looks. Guildmates you invite as Editors can add their own character; each of them can change only the cards they added." }), removeBtn);
+    }
+  }
+
+  // ---------- story ----------
+  var S = { open: false, list: [], ci: 0, si: 0, slides: [], elapsed: 0, last: 0, paused: false, raf: 0 };
+  var storyEl, frameEl, bgEl, barsEl, avEl, whoName, whoPos, hostEl, prevCharBtn, nextCharBtn, pauseBtn;
+  function buildStoryShell() {
+    bgEl = h("img", { class: "story-bg", alt: "" });
+    barsEl = h("div", { class: "bars", "aria-hidden": "true" });
+    avEl = h("img", { class: "av", alt: "" });
+    whoName = h("b"); whoPos = h("small");
+    pauseBtn = h("button", { class: "icon-btn", type: "button", "aria-label": "Pause", onclick: togglePause }, "❚❚");
+    hostEl = h("div", { class: "host", "aria-live": "polite" });
+    prevCharBtn = h("button", { class: "btn ghost", type: "button", onclick: function () { goChar(S.ci - 1); } });
+    nextCharBtn = h("button", { class: "btn", type: "button", onclick: function () { goChar(S.ci + 1); } });
+    frameEl = h("div", { class: "frame" });
+    storyEl = h("div", { class: "story", role: "dialog", "aria-modal": "true", "aria-label": "Guild Wrapped story", hidden: true },
+      bgEl,
+      add2(frameEl,
+        barsEl,
+        h("div", { class: "story-head" }, avEl, h("div", { class: "who" }, whoName, whoPos), pauseBtn,
+          h("button", { class: "icon-btn", type: "button", "aria-label": "Close", onclick: closeStory }, "✕")),
+        hostEl,
+        h("div", { class: "story-foot" }, prevCharBtn, nextCharBtn)));
+    document.body.append(storyEl);
+    function add2(el) { for (var i = 1; i < arguments.length; i++) add(el, arguments[i]); return el; }
+    document.addEventListener("keydown", function (e) {
+      if (!S.open || (editorEl && !editorEl.hidden)) return;
+      if (e.key === "Escape") closeStory();
+      else if (e.key === "ArrowRight") step(1);
+      else if (e.key === "ArrowLeft") step(-1);
+    });
+  }
+  function accentFor(i) { return "var(--a" + (i % 6 + 1) + ")"; }
+  function slidesFor(c) {
+    var st = stats(c), out = [], urls = artUrls(c);
+    function push(kind, kids, opts) { out.push({ kind: kind, kids: kids, opts: opts || {} }); }
+    var introCar = urls.length ? carousel(urls, { alt: "Art of " + fullName(c), onMove: function () { S.elapsed = 0; } }) : null;
+    push("intro", [
+      introCar ? h("div", { class: "intro-car" }, introCar.el) : null,
+      h("div", { class: "kicker", text: "Guild Wrapped " + YEAR }),
+      h("div", { class: "intro-name", text: fullName(c) }),
+      h("div", { class: "line", text: metaLine(c) + (c.fac ? " · " + c.fac : "") }),
+      st ? null : h("div", { class: "line", text: "Stats sharing is off for this character, so this Wrapped is short. In game: /gf stats share on, then /gf export." })
+    ]);
+    if (st && (num(st.kills) || num(st.quests))) push("grind", [
+      h("div", { class: "kicker", text: "The grind" }),
+      h("div", { class: "big", text: fmt(st.kills) }),
+      h("div", { class: "cap", text: "mobs defeated" }),
+      num(st.quests) ? h("div", { class: "line" }, "plus ", h("strong", { text: plural(st.quests, "quest", "quests") }), " turned in.") : null
+    ]);
+    if (st) {
+      var world = [["Dungeons", st.dungeons], ["Bosses down", st.bosses], ["Flight paths", st.flights], ["Hearthstones", st.hearths]].filter(function (x) { return num(x[1]) > 0; });
+      if (world.length) push("world", [
+        h("div", { class: "kicker", text: "Out in Azeroth" }),
+        h("div", { class: "quad" }, world.map(function (x) { return h("div", null, h("b", { text: fmt(x[1]) }), h("span", { text: x[0] })); })),
+        num(st.explore) ? h("div", { class: "line" }, h("strong", { text: fmt(st.explore) + " XP" }), " just from discovering new places.") : null
+      ]);
+      if (num(st.epics) || num(st.rares) || st.firstEpic || num(st.gold)) push("loot", [
+        h("div", { class: "kicker", text: "Loot" }),
+        h("div", { class: "quad" },
+          h("div", null, h("b", { text: fmt(st.epics) }), h("span", { text: "epics" })),
+          h("div", null, h("b", { text: fmt(st.rares) }), h("span", { text: "rares" })),
+          num(st.gold) ? h("div", null, h("b", { text: gold(st.gold) }), h("span", { text: "gold earned" })) : null),
+        st.firstEpic ? h("div", { class: "line" }, "First epic: ", h("strong", { text: String(st.firstEpic) }), st.firstEpicAt ? ", on " + day(st.firstEpicAt) + "." : ".") : null
+      ]);
+    }
+    var profs = arr(c.prof).filter(function (p) { return Array.isArray(p) && p[0]; });
+    if (profs.length) push("craft", [
+      h("div", { class: "kicker", text: "Professions" }),
+      h("div", { class: "skills" }, profs.map(function (p) {
+        var cur = num(p[1]), max = num(p[2]) || 300;
+        return h("div", { class: "skill" },
+          h("div", { class: "skill-top" }, h("span", { text: p[0] }), h("span", { text: fmt(cur) + " / " + fmt(max) })),
+          h("div", { class: "track" }, h("i", { style: "width:" + Math.max(0, Math.min(100, cur / max * 100)).toFixed(1) + "%" })));
+      })),
+      st && (num(st.skillUps) || num(st.fish)) ? h("div", { class: "line" },
+        num(st.skillUps) ? [h("strong", { text: plural(st.skillUps, "skill-up", "skill-ups") }), num(st.fish) ? " and " : "."] : null,
+        num(st.fish) ? [h("strong", { text: plural(st.fish, "fish", "fish") }), " caught."] : null) : null
+    ]);
+    if (st && (num(st.bestXph) || num(st.longestSession) || num(st.sessions))) push("time", [
+      h("div", { class: "kicker", text: "Time well spent" }),
+      num(st.bestXph) ? h("div", { class: "big mid", text: fmt(st.bestXph) }) : null,
+      num(st.bestXph) ? h("div", { class: "cap", text: "XP per hour, best session" }) : null,
+      h("div", { class: "quad" },
+        num(st.longestSession) ? h("div", null, h("b", { text: duration(st.longestSession) }), h("span", { text: "longest session" })) : null,
+        num(st.sessions) ? h("div", null, h("b", { text: fmt(st.sessions) }), h("span", { text: "play sessions" })) : null),
+      st.since ? h("div", { class: "line", text: "Counting since " + day(st.since) + "." }) : null
+    ]);
+    if (st) {
+      var d = num(st.deaths);
+      var quip = d === 0 ? "Not once. Suspicious." : d < 10 ? "Barely a scratch." : d < 50 ? "The spirit healer knows your name." : d < 150 ? "Repair bills: legendary." : "At this point it's a lifestyle.";
+      push("deaths", [
+        h("div", { class: "kicker", text: "Spirit healer visits" }),
+        h("div", { class: "big", text: fmt(d) }),
+        h("div", { class: "cap", text: d === 1 ? "death" : "deaths" }),
+        h("div", { class: "line", text: quip })
+      ]);
+    }
+    if (arr(c.att).length) push("attune", [
+      h("div", { class: "kicker", text: "Attuned" }),
+      h("div", { class: "cap", text: "Ready for " + plural(c.att.length, "raid", "raids") }),
+      h("div", { class: "chips" }, c.att.map(function (a) { return h("span", { text: a }); }))
+    ]);
+    if (arr(c.clips).length) push("memories", [
+      h("div", { class: "kicker", text: "Memories" }),
+      h("div", { class: "clips-list" }, c.clips.map(function (clip) {
+        return h("figure", { class: "clip" },
+          h("video", { src: clipUrl(clip), controls: true, playsinline: true, preload: "metadata" }),
+          h("figcaption", null, h("b", { text: clip.title || "Untitled clip" }), h("span", { text: clipTime(clip.dur) })));
+      }))
+    ], { noTap: true, noAuto: true });
+    var next = S.list[S.ci + 1];
+    push("outro", [
+      h("div", { class: "kicker", text: "That's a wrap" }),
+      h("div", { class: "outro-card" }, cardEl(c, "still")),
+      h("div", { class: "cap", text: fullName(c) + "'s year in the guild." }),
+      next ? h("button", { class: "btn primary", type: "button", onclick: function () { goChar(S.ci + 1); } }, "Up next: " + fullName(next) + " →")
+           : h("button", { class: "btn", type: "button", onclick: closeStory }, "Back to everyone")
+    ], { noTap: true, noAuto: true });
+    return out;
+  }
+  function openStory(id) {
+    S.list = playable();
+    var i = S.list.findIndex(function (c) { return c.id === id; });
+    if (i < 0) return;
+    if (!storyEl) buildStoryShell();
+    S.open = true; storyEl.hidden = false; document.body.style.overflow = "hidden";
+    goChar(i, true);
+    try { if (location.hash !== "#c-" + id) location.hash = "c-" + id; } catch (e) {}
+  }
+  function closeStory() {
+    if (!S.open) return;
+    S.open = false; storyEl.hidden = true; document.body.style.overflow = "";
+    stopVideos(); cancelAnimationFrame(S.raf);
+    try { if (location.hash) location.hash = ""; } catch (e) {}
+  }
+  function goChar(i, fresh) {
+    if (i < 0) i = 0;
+    if (i >= S.list.length) { closeStory(); return; }
+    S.ci = i; var c = S.list[i];
+    S.slides = slidesFor(c); S.si = 0;
+    var url = artUrl(c);
+    bgEl.src = url; avEl.src = url;
+    frameEl.className = "frame t-" + themeKey(c);
+    whoName.textContent = fullName(c);
+    var prev = S.list[i - 1], next = S.list[i + 1];
+    prevCharBtn.hidden = !prev; nextCharBtn.hidden = !next;
+    prevCharBtn.innerHTML = ""; nextCharBtn.innerHTML = "";
+    if (prev) prevCharBtn.append("← ", h("span", { text: prev.name }));
+    if (next) nextCharBtn.append(h("span", { text: next.name }), " →");
+    barsEl.innerHTML = "";
+    S.slides.forEach(function () { barsEl.append(h("div", { class: "bar" }, h("i"))); });
+    if (!fresh) { try { location.hash = "c-" + c.id; } catch (e) {} }
+    showSlide();
+  }
+  function stopVideos() { if (hostEl) hostEl.querySelectorAll("video").forEach(function (v) { try { v.pause(); } catch (e) {} }); }
+  function showSlide() {
+    stopVideos();
+    var sl = S.slides[S.si];
+    hostEl.innerHTML = "";
+    hostEl.className = "host" + (sl.opts.noTap ? " no-tap" : "");
+    hostEl.append(
+      h("section", { class: "slide s-" + sl.kind, style: "--acc:" + accentFor(S.ci + S.si) }, sl.kids),
+      h("button", { class: "tap prev", type: "button", "aria-label": "Previous slide", onclick: function () { step(-1); } }),
+      h("button", { class: "tap next", type: "button", "aria-label": "Next slide", onclick: function () { step(1); } }));
+    hostEl.scrollTop = 0;
+    whoPos.textContent = (S.ci + 1) + " of " + S.list.length + " · slide " + (S.si + 1) + " of " + S.slides.length;
+    var bars = barsEl.children;
+    for (var i = 0; i < bars.length; i++) bars[i].firstChild.style.width = i < S.si ? "100%" : "0%";
+    S.elapsed = 0; S.last = performance.now();
+    cancelAnimationFrame(S.raf); S.raf = requestAnimationFrame(tick);
+    pauseBtn.hidden = !!sl.opts.noAuto;
+  }
+  function tick(now) {
+    if (!S.open) return;
+    var sl = S.slides[S.si];
+    if (!S.paused && !sl.opts.noAuto && !document.hidden) S.elapsed += now - S.last;
+    S.last = now;
+    var bar = barsEl.children[S.si];
+    if (bar) bar.firstChild.style.width = sl.opts.noAuto ? "100%" : Math.min(100, S.elapsed / SLIDE_MS * 100) + "%";
+    if (!sl.opts.noAuto && S.elapsed >= SLIDE_MS) { step(1); return; }
+    S.raf = requestAnimationFrame(tick);
+  }
+  function step(d) {
+    var n = S.si + d;
+    if (n < 0) { if (S.ci > 0) goChar(S.ci - 1); else { S.si = 0; showSlide(); } return; }
+    if (n >= S.slides.length) { goChar(S.ci + 1); return; }
+    S.si = n; showSlide();
+  }
+  function togglePause() {
+    S.paused = !S.paused;
+    pauseBtn.textContent = S.paused ? "▶" : "❚❚";
+    pauseBtn.setAttribute("aria-label", S.paused ? "Play" : "Pause");
+  }
+  function routeHash() {
+    var m = /^#c-([A-Za-z0-9-]+)$/.exec(location.hash || "");
+    if (m) { if (!S.open || (S.list[S.ci] && S.list[S.ci].id !== m[1])) openStory(m[1]); }
+    else if (S.open) closeStory();
+  }
+  window.addEventListener("hashchange", routeHash);
+
+  // ---------- editor (only for people who can edit the page) ----------
+  var editorEl = null, ED = null;
+  function loadImage(src) { return new Promise(function (res, rej) { var i = new Image(); i.onload = function () { res(i); }; i.onerror = function () { rej(new Error("That image couldn't be opened. Try a PNG or JPG.")); }; i.src = src; }); }
+  function prepareArt(file) {
+    if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) return Promise.reject(new Error("Use a PNG, JPG, WebP or GIF image for the art."));
+    if (file.type === "image/gif") {
+      if (file.size > MAX_BYTES) return Promise.reject(new Error("That GIF is over 20 MB. Use a smaller one or a still image."));
+      return Promise.resolve({ blob: file });
+    }
+    var url = URL.createObjectURL(file);
+    return loadImage(url).then(function (img) {
+      var w = img.naturalWidth, hh = img.naturalHeight, scale = Math.min(1, 1600 / Math.max(w, hh));
+      if (scale === 1 && file.size <= 3 * 1048576) { URL.revokeObjectURL(url); return { blob: file }; }
+      var cv = document.createElement("canvas"); cv.width = Math.round(w * scale); cv.height = Math.round(hh * scale);
+      cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(url);
+      return new Promise(function (res) { cv.toBlob(function (b) { res(b); }, "image/webp", 0.88); }).then(function (b) {
+        if (b && b.type === "image/webp") return { blob: b };
+        return new Promise(function (res) { cv.toBlob(function (b2) { res({ blob: b2 }); }, "image/jpeg", 0.9); });
+      });
+    });
+  }
+  function videoInfo(file) {
+    return new Promise(function (res, rej) {
+      if (!/^video\/(mp4|webm)$/.test(file.type)) { rej(new Error("Clips have to be MP4 or WebM. iPhone .mov clips can be shared or exported as MP4.")); return; }
+      if (file.size > MAX_BYTES) { rej(new Error("That clip is " + (file.size / 1048576).toFixed(0) + " MB; the limit is 20 MB. Export it at 720p or trim it.")); return; }
+      var v = document.createElement("video"), u = URL.createObjectURL(file);
+      v.preload = "metadata"; v.muted = true;
+      v.onloadedmetadata = function () {
+        if (!isFinite(v.duration) || v.duration > MAX_CLIP_SECONDS + 0.9) { URL.revokeObjectURL(u); rej(new Error("That clip is " + clipTime(v.duration) + " long; the limit is 2:00. Trim it and try again.")); return; }
+        res({ dur: v.duration, url: u });
+      };
+      v.onerror = function () { URL.revokeObjectURL(u); rej(new Error("This browser can't read that clip. Use an MP4 (H.264) or WebM file.")); };
+      v.src = u;
+    });
+  }
+
+  function openEditor(id) {
+    if (!canEdit) return;
+    var c = id ? DATA.chars.find(function (x) { return x.id === id; }) : null;
+    if (c && !canChange(c)) return;
+    ED = {
+      existing: c, decoded: null, pick: 0, theme: c ? themeKey(c) : "guild", removedArts: [], refresh: null,
+      arts: c ? artsOf(c).map(function (a) { return { kind: "old", a: a, url: artSrc(c, a) }; }) : [],
+      slots: [0, 1, 2].map(function (i) { var k = c && arr(c.clips)[i]; return k ? { kind: "old", clip: k, title: k.title || "" } : { kind: "empty" }; }),
+      busy: false
+    };
+    if (editorEl) editorEl.remove();
+    editorEl = h("div", { class: "modal", role: "dialog", "aria-modal": "true", "aria-label": c ? "Edit character" : "Add character" });
+    editorEl.addEventListener("keydown", function (e) { if (e.key === "Escape" && !ED.busy) closeEditor(); });
+    document.body.append(editorEl);
+    renderEditor();
+    var first = editorEl.querySelector("textarea"); if (first) first.focus();
+  }
+  function closeEditor() { if (editorEl) { editorEl.remove(); editorEl = null; } ED = null; }
+  function renderEditor() {
+    var c = ED.existing, sheet = h("form", { class: "sheet", onsubmit: function (e) { e.preventDefault(); save(); } });
+    sheet.append(h("h2", { text: c ? "Edit " + fullName(c) : "Add a character" }));
+
+    // export code
+    var status = h("div", { class: "status", id: "ed-code-status", "aria-live": "polite" });
+    var code = h("textarea", { id: "ed-code", spellcheck: "false", placeholder: "GFOA1.…", oninput: function () { onCode(code.value, status, pickWrap); } });
+    var pickWrap = h("div");
+    sheet.append(h("div", { class: "field" },
+      h("label", { class: "lbl", for: "ed-code", text: c ? "New export code (optional, refreshes the stats)" : "Export code (required)" }),
+      h("div", { class: "hint" }, "In game, type ", h("code", { text: "/gf export" }), ", press Ctrl+A then Ctrl+C, and paste it here. If it comes in parts, paste every part in order. For the full Wrapped, type ", h("code", { text: "/gf stats share on" }), " before exporting."),
+      code, status, pickWrap));
+    if (c && c.sample) status.textContent = "This is an example card. Delete it once real characters are in.";
+
+    // look: theme picker with a live preview of the card
+    var prevBox = h("div", { class: "look-prev", "aria-hidden": "true" });
+    var themesBox = h("div", { class: "themes", role: "group", "aria-label": "Card theme" });
+    THEMES.forEach(function (t) {
+      themesBox.append(h("button", { class: "theme-opt t-" + t[0], type: "button", "data-k": t[0], "aria-pressed": ED.theme === t[0] ? "true" : "false", onclick: function () {
+        ED.theme = t[0];
+        for (var j = 0; j < themesBox.children.length; j++) themesBox.children[j].setAttribute("aria-pressed", themesBox.children[j].getAttribute("data-k") === ED.theme ? "true" : "false");
+        updatePreview();
+      } }, h("span", { class: "sw" }), h("b", { text: t[1] }), h("span", { text: t[2] })));
+    });
+    function previewChar() {
+      var picked = ED.decoded ? fromExport(ED.decoded.chars[ED.pick] || ED.decoded.chars[0], ED.decoded.t) : null;
+      return Object.assign({ name: "New character", clips: [] }, ED.existing || {}, picked || {}, { theme: ED.theme });
+    }
+    function updatePreview() {
+      prevBox.innerHTML = "";
+      prevBox.append(cardEl(previewChar(), "still", ED.arts.map(function (a) { return a.url; })));
+    }
+    ED.refresh = updatePreview;
+
+    // art: up to 6 pictures, the first is the cover
+    var artsBox = h("div", { class: "arts" });
+    var artStatus = h("div", { class: "status", "aria-live": "polite" });
+    var artInput = h("input", { type: "file", id: "ed-art", multiple: true, accept: "image/png,image/jpeg,image/webp,image/gif", onchange: function () {
+      var files = [].slice.call(artInput.files || []); artInput.value = "";
+      if (!files.length) return;
+      var room = MAX_ARTS - ED.arts.length;
+      if (room <= 0) { artStatus.className = "status err"; artStatus.textContent = "That's the limit of " + MAX_ARTS + " pictures. Remove one first."; return; }
+      var extra = files.length - room; files = files.slice(0, room);
+      artStatus.className = "status"; artStatus.textContent = "Preparing " + plural(files.length, "picture", "pictures") + "…";
+      files.reduce(function (pr, f) {
+        return pr.then(function () { return prepareArt(f).then(function (r) { ED.arts.push({ kind: "new", blob: r.blob, url: URL.createObjectURL(r.blob) }); }); });
+      }, Promise.resolve()).then(function () {
+        artStatus.className = "status ok";
+        artStatus.textContent = extra > 0 ? "Added. Only " + MAX_ARTS + " pictures fit, so " + plural(extra, "picture was", "pictures were") + " left out." : "Added.";
+        drawArts();
+      }).catch(function (e) { artStatus.className = "status err"; artStatus.textContent = e.message; drawArts(); });
+    } });
+    function drawArts() {
+      artsBox.innerHTML = "";
+      var last = ED.arts.length - 1;
+      ED.arts.forEach(function (a, i) {
+        artsBox.append(h("div", { class: "art-th" },
+          h("img", { src: a.url, alt: "Picture " + (i + 1) }),
+          i === 0 ? h("span", { class: "cover", text: "Cover" }) : null,
+          h("div", { class: "row" },
+            h("button", { class: "mini", type: "button", "aria-label": "Move picture " + (i + 1) + " earlier", disabled: i === 0, onclick: function () { moveArt(i, -1); } }, "←"),
+            h("button", { class: "mini", type: "button", "aria-label": "Remove picture " + (i + 1), onclick: function () { removeArt(i); } }, "✕"),
+            h("button", { class: "mini", type: "button", "aria-label": "Move picture " + (i + 1) + " later", disabled: i === last, onclick: function () { moveArt(i, 1); } }, "→"))));
+      });
+      if (!ED.arts.length) artsBox.append(h("span", { class: "hint", text: "No pictures yet." }));
+      updatePreview();
+    }
+    function moveArt(i, d) { var t = ED.arts[i]; ED.arts[i] = ED.arts[i + d]; ED.arts[i + d] = t; drawArts(); }
+    function removeArt(i) { var a = ED.arts.splice(i, 1)[0]; if (a.kind === "old" && a.a.id) ED.removedArts.push(a.a.id); drawArts(); }
+    sheet.append(h("div", { class: "field" },
+      h("label", { class: "lbl", for: "ed-art", text: "Character art (at least 1, up to " + MAX_ARTS + " pictures)" }),
+      h("div", { class: "hint", text: "Screenshots, drawings, commissions: anything of the character. The first picture is the cover; the rest show with the arrows or a swipe. Portrait shapes look best, and big images are shrunk to save space." }),
+      artsBox, artInput, artStatus));
+    sheet.append(h("div", { class: "field" },
+      h("div", { class: "lbl", text: "Card theme (optional)" }),
+      h("div", { class: "look" }, prevBox, themesBox)));
+    drawArts();
+
+    // clips
+    var slots = h("div", { class: "slots" });
+    ED.slots.forEach(function (s, i) { slots.append(slotEl(s, i)); });
+    sheet.append(h("div", { class: "field" },
+      h("div", { class: "lbl", text: "Memories (optional, up to 3 clips)" }),
+      h("div", { class: "hint", text: "MP4 or WebM, 2 minutes at most and 20 MB each. They play on the Memories slide of this character's Wrapped." }),
+      slots));
+
+    // actions
+    var progress = h("div", { class: "status", id: "ed-progress", "aria-live": "polite" });
+    var confirmWrap = h("div");
+    var del = c ? h("button", { class: "btn danger", type: "button", onclick: function () {
+      if (confirmWrap.firstChild) return;
+      confirmWrap.append(h("div", { class: "confirm" }, "Delete " + fullName(c) + " and their art and clips for good?",
+        h("button", { class: "btn danger", type: "button", onclick: function () { removeChar(c, progress); } }, "Delete"),
+        h("button", { class: "btn ghost", type: "button", onclick: function () { confirmWrap.innerHTML = ""; } }, "Keep")));
+    } }, "Delete") : null;
+    sheet.append(progress, confirmWrap, h("div", { class: "actions" }, del, h("span", { class: "spacer" }),
+      h("button", { class: "btn ghost", type: "button", onclick: function () { if (!ED.busy) closeEditor(); } }, "Cancel"),
+      h("button", { class: "btn primary", type: "submit", id: "ed-save" }, c ? "Save changes" : "Add to Guild Wrapped")));
+
+    editorEl.innerHTML = ""; editorEl.append(sheet);
+  }
+  function onCode(val, status, pickWrap) {
+    pickWrap.innerHTML = ""; ED.decoded = null; ED.pick = 0;
+    var r;
+    try { r = parseExport(val); } catch (e) { status.className = "status err"; status.textContent = e.message; if (ED.refresh) ED.refresh(); return; }
+    if (!r) { status.className = "status"; status.textContent = ""; if (ED.refresh) ED.refresh(); return; }
+    ED.decoded = r;
+    var c0 = r.chars[0];
+    status.className = "status ok";
+    status.textContent = r.chars.length === 1
+      ? "Found " + c0.n + ", level " + (c0.lvl || "?") + " " + classInfo(c0.cls)[0] + (c0.st && !c0.st.off ? ", with stats." : ". Stats sharing is off, so their Wrapped will be short.")
+      : "Found " + r.chars.length + " characters. Pick one:";
+    if (r.chars.length > 1) {
+      var sel = h("select", { id: "ed-char", "aria-label": "Character", onchange: function () { ED.pick = Number(sel.value); if (ED.refresh) ED.refresh(); } },
+        r.chars.map(function (x, i) { return h("option", { value: String(i), text: x.n + (x.sn ? " " + x.sn : "") + " · level " + (x.lvl || "?") + " " + classInfo(x.cls)[0] + (x.st && !x.st.off ? "" : " (no stats)") }); }));
+      if (ED.existing) {
+        var match = r.chars.findIndex(function (x) { return x.n === ED.existing.name; });
+        if (match >= 0) { sel.value = String(match); ED.pick = match; }
+      }
+      pickWrap.append(sel);
+    }
+    if (ED.refresh) ED.refresh();
+  }
+  function slotEl(s, i) {
+    var box = h("div", { class: "slot" });
+    if (s.kind === "empty") {
+      var st = h("div", { class: "status", "aria-live": "polite" });
+      var inp = h("input", { type: "file", id: "ed-clip-" + i, accept: "video/mp4,video/webm", "aria-label": "Clip " + (i + 1), onchange: function () {
+        var f = inp.files && inp.files[0]; if (!f) return;
+        st.className = "status"; st.textContent = "Checking clip…";
+        videoInfo(f).then(function (info) {
+          ED.slots[i] = { kind: "new", file: f, dur: info.dur, url: info.url, title: f.name.replace(/\.[^.]+$/, "").slice(0, 60), removed: s.removed };
+          box.replaceWith(slotEl(ED.slots[i], i));
+        }).catch(function (e) { st.className = "status err"; st.textContent = e.message; inp.value = ""; });
+      } });
+      box.append(h("div", { class: "slot-title", text: "Clip " + (i + 1) }), inp, st);
+      return box;
+    }
+    var src = s.kind === "new" ? s.url : clipUrl(s.clip);
+    var dur = s.kind === "new" ? s.dur : s.clip.dur;
+    var title = h("input", { type: "text", id: "ed-clip-title-" + i, maxlength: "60", value: s.title, "aria-label": "Clip " + (i + 1) + " title", placeholder: "What happened?", oninput: function () { s.title = title.value; } });
+    box.append(h("div", { class: "slot-title", text: "Clip " + (i + 1) + " · " + clipTime(dur) + (s.kind === "new" ? " · new" : "") }),
+      h("div", { class: "slot-row" }, h("video", { src: src, muted: true, preload: "metadata", playsinline: true }),
+        h("div", { class: "grow" }, title),
+        h("button", { class: "btn ghost", type: "button", onclick: function () { ED.slots[i] = { kind: "empty", removed: s.kind === "old" ? s.clip.id : (s.removed || null) }; box.replaceWith(slotEl(ED.slots[i], i)); } }, "Remove")));
+    return box;
+  }
+  function setBusy(on, msg) {
+    if (!editorEl) return;
+    ED.busy = on;
+    editorEl.querySelectorAll("button, input, textarea, select").forEach(function (b) { b.disabled = on; });
+    var p = editorEl.querySelector("#ed-progress");
+    if (p) { p.className = "status"; p.textContent = msg || ""; }
+  }
+  function fail(e, uploaded) {
+    cleanup(uploaded);
+    setBusy(false);
+    var p = editorEl && editorEl.querySelector("#ed-progress");
+    if (p) { p.className = "status err"; p.textContent = errText(e); }
+  }
+  function save() {
+    if (!ED || ED.busy) return;
+    var c = ED.existing, p = editorEl.querySelector("#ed-progress");
+    var picked = ED.decoded ? ED.decoded.chars[ED.pick] : null;
+    if (!c && !picked) { p.className = "status err"; p.textContent = "Paste the export code first. A character needs an export code and at least one picture; everything else is optional."; return; }
+    if (!ED.arts.length) { p.className = "status err"; p.textContent = "Add at least one picture. Only characters with art are in Guild Wrapped."; return; }
+    var uploaded = [], toDelete = ED.removedArts.slice();
+    var chain = Promise.resolve();
+    var newArts = ED.arts.filter(function (a) { return a.kind === "new"; }), an = 0;
+    newArts.forEach(function (a) {
+      chain = chain.then(function () {
+        an++; setBusy(true, "Uploading picture " + an + " of " + newArts.length + "…");
+        return ASSETS.upload(a.blob).then(function (r) { uploaded.push(r.id); a.id = r.id; });
+      });
+    });
+    var clips = [];
+    var newCount = ED.slots.filter(function (s) { return s.kind === "new"; }).length, n = 0;
+    ED.slots.forEach(function (s) {
+      if (s.kind === "empty") { if (s.removed) toDelete.push(s.removed); return; }
+      if (s.kind === "old") { clips.push(Object.assign({}, s.clip, { title: (s.title || "").trim().slice(0, 60) })); return; }
+      if (s.removed) toDelete.push(s.removed);
+      chain = chain.then(function () {
+        n++; setBusy(true, "Uploading clip " + n + " of " + newCount + "…");
+        return ASSETS.upload(s.file).then(function (r) {
+          uploaded.push(r.id);
+          clips.push({ id: r.id, title: (s.title || "").trim().slice(0, 60), dur: Math.round(s.dur), type: s.file.type });
+        });
+      });
+    });
+    chain.then(function () {
+      setBusy(true, "Saving…");
+      var base = c ? Object.assign({}, c) : { id: newId(), added: Math.floor(Date.now() / 1000), by: myId };
+      if (picked) { Object.assign(base, fromExport(picked, ED.decoded.t)); delete base.sample; }
+      base.arts = ED.arts.map(function (a) { return a.kind === "old" ? a.a : { id: a.id }; });
+      delete base.art;
+      base.theme = ED.theme; base.clips = clips;
+      if (base.sample && newArts.length) delete base.sample;
+      var chars = DATA.chars.slice();
+      var idx = c ? chars.findIndex(function (x) { return x.id === c.id; }) : -1;
+      if (idx >= 0) chars[idx] = base; else chars.push(base);
+      return publish({ v: 1, chars: chars });
+    }).then(function () {
+      cleanup(toDelete);
+      setBusy(false, "Saved. Reloading…");
+      toast(c ? "Saved" : "Added to Guild Wrapped");
+    }).catch(function (e) { fail(e, uploaded); });
+  }
+  function removeChar(c, progress) {
+    setBusy(true, "Deleting…");
+    var ids = [];
+    artsOf(c).forEach(function (a) { if (a.id) ids.push(a.id); });
+    arr(c.clips).forEach(function (k) { if (k.id) ids.push(k.id); });
+    publish({ v: 1, chars: DATA.chars.filter(function (x) { return x.id !== c.id; }) })
+      .then(function () { cleanup(ids); toast("Deleted " + fullName(c)); })
+      .catch(function (e) { fail(e, []); });
+  }
+
+  // ---------- start ----------
+  renderShell();
+  renderGallery();
+  routeHash();
+
+})();
+</script>
