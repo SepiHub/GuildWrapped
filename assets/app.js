@@ -322,7 +322,7 @@
     root.append(h("main", { class: "wrap" },
       h("header", { class: "top" },
         eyebrow,
-        h("h1", null, "Guild ", h("span", { class: "w", text: "Wrapped" }), " " + YEAR),
+        h("h1", null, "Guild ", h("span", { class: "w", text: "Wrapped" })),
         h("p", { class: "lede", text: "Every guildmate who sent in art of their character gets a card. Tap one to play their year in the guild, then keep going to the next." }),
         h("div", { class: "rule" }),
         h("div", { class: "toolbar" },
