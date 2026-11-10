@@ -46,8 +46,27 @@
       ],
       "tal": [],
       "att": [],
-      "st": null,
-      "exported": 1794301971
+      "st": {
+        "bestXph": 36771,
+        "bosses": 58,
+        "deaths": 16,
+        "dungeons": 12,
+        "epics": 0,
+        "explore": 15820,
+        "fish": 0,
+        "flights": 35,
+        "hearths": 14,
+        "kills": 1937,
+        "longestSession": 37807,
+        "quests": 159,
+        "rares": 16,
+        "sessions": 18,
+        "since": 1793995326,
+        "skillUps": 877,
+        "t": 1794302108,
+        "v": 1
+      },
+      "exported": 1794302115
     },
     {
       "id": "cmossbelly",
