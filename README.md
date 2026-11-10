@@ -53,7 +53,6 @@ Then whoever adds characters:
 - `arts`: the first picture is the cover; cards keep a 3:4 shape, so portrait pictures look best.
 - Character fields come from the export code: `/gf export` gives `GFOA1.<crc32 hex>.<base64 of UTF-8 JSON>`; the
   builder checks the CRC32 and decodes it. `st` (shared stats) is there only when the player has stats sharing on.
-- The two `"sample": true` entries are examples with generated art; delete them once real characters are in.
 
 ## Wrapped slides
 
