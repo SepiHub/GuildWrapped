@@ -65,7 +65,7 @@ h1 .w { background: var(--rainbow); -webkit-background-clip: text; background-cl
 .icon-btn { width: 36px; height: 36px; display: inline-grid; place-items: center; border-radius: 50%; border: 0; background: var(--glass); color: var(--text); font-size: 16px; line-height: 1; }
 
 /* Gallery */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 38px 34px; padding: 10px 8px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 40px 36px; padding: 10px 8px; }
 .card-wrap { position: relative; }
 .card { position: relative; display: block; width: 100%; aspect-ratio: 3 / 4; max-width: 100%; border: 1px solid var(--t-edge); border-radius: 18px; background: var(--surface); color: var(--text); text-align: left; box-shadow: 0 10px 30px var(--t-glow); transition: transform 0.2s ease, box-shadow 0.2s ease; }
 .card-wrap:hover .card { transform: translateY(-3px); box-shadow: 0 14px 38px var(--t-glow), 0 0 0 1px var(--t-edge); }
@@ -75,8 +75,8 @@ h1 .w { background: var(--rainbow); -webkit-background-clip: text; background-cl
 .theme-ico { display: inline-block; width: 18px; height: 18px; margin-right: 6px; vertical-align: -3px; }
 .card .tint { position: absolute; inset: 0; background: var(--t-tint); pointer-events: none; }
 .card .shade { position: absolute; inset: 0; background: linear-gradient(to top, var(--t-shade) 0%, var(--t-shade-mid) 40%, transparent 66%); pointer-events: none; }
-.card .info { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px; display: grid; gap: 6px; pointer-events: none; z-index: 1; }
-.card .name { font-family: var(--t-font); font-weight: 700; font-size: 17px; line-height: 1.15; text-wrap: balance; overflow-wrap: anywhere; }
+.card .info { position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 18px; display: grid; gap: 7px; pointer-events: none; z-index: 1; }
+.card .name { font-family: var(--t-font); font-weight: 700; font-size: 20px; line-height: 1.15; text-wrap: balance; overflow-wrap: anywhere; }
 .card .orn { width: 44px; height: 2px; border-radius: 2px; background: var(--t-rule); }
 .card-hit { position: absolute; inset: 0; z-index: 2; padding: 0; border: 0; border-radius: inherit; background: transparent; touch-action: pan-y; }
 .card-hit:focus-visible { outline: 2px solid var(--a1); outline-offset: -3px; }
@@ -93,11 +93,11 @@ h1 .w { background: var(--rainbow); -webkit-background-clip: text; background-cl
 .car-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--track); }
 .car-dots i.on { background: var(--text); }
 @media (prefers-reduced-motion: reduce) { .car-track { transition: none; } }
-.card .sub { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13px; }
+.card .sub { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 14px; }
 .card .lvl { color: var(--cc); font-weight: 700; font-variant-numeric: tabular-nums; }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cc); flex: none; }
 .profs { display: flex; flex-wrap: wrap; gap: 4px; }
-.profs span { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--t-chip); border: 1px solid var(--t-edge); }
+.profs span { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--t-chip); border: 1px solid var(--t-edge); }
 .pill { position: absolute; top: 10px; z-index: 3; pointer-events: none; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
 .pill.example { left: 10px; background: var(--butter); color: var(--surface); }
 .pill.clips { right: 10px; background: var(--glass); color: var(--text); border: 1px solid var(--line); }
