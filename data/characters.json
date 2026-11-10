@@ -79,7 +79,7 @@
       "theme": "grove",
       "arts": [
         {
-          "src": "art/pets-fault-1.jpg"
+          "src": "art/pets-fault-2.jpg"
         }
       ],
       "clips": [],
@@ -135,6 +135,90 @@
         "v": 1
       },
       "exported": 1794303960
+    },
+    {
+      "id": "c-may-die",
+      "theme": "grove",
+      "arts": [
+        {
+          "src": "art/may-die-1.jpg"
+        },
+        {
+          "src": "art/may-die-2.jpg"
+        },
+        {
+          "src": "art/may-die-3.jpg"
+        }
+      ],
+      "clips": [
+        {
+          "title": "Solid Snake RP (fail)",
+          "src": "clips/may-die-1.mp4",
+          "dur": 94
+        },
+        {
+          "title": "One shot",
+          "src": "clips/may-die-2.mp4",
+          "dur": 6
+        },
+        {
+          "title": "Burt got wrecked",
+          "src": "clips/may-die-3.mp4",
+          "dur": 13
+        }
+      ],
+      "added": 1794305000,
+      "name": "May",
+      "sn": "Die",
+      "cls": "DRUID",
+      "race": "Night Elf",
+      "lvl": 39,
+      "fac": "Alliance",
+      "prof": [
+        [
+          "Leatherworking",
+          157,
+          225
+        ],
+        [
+          "Skinning",
+          259,
+          300
+        ],
+        [
+          "First Aid",
+          1,
+          75
+        ],
+        [
+          "Cooking",
+          222,
+          225
+        ]
+      ],
+      "tal": [],
+      "att": [],
+      "st": {
+        "bestXph": 33495,
+        "bosses": 25,
+        "deaths": 17,
+        "dungeons": 3,
+        "epics": 0,
+        "explore": 13896,
+        "fish": 0,
+        "flights": 28,
+        "hearths": 10,
+        "kills": 1983,
+        "longestSession": 29637,
+        "quests": 127,
+        "rares": 5,
+        "sessions": 17,
+        "since": 1794101917,
+        "skillUps": 381,
+        "t": 1794304955,
+        "v": 1
+      },
+      "exported": 1794304963
     }
   ]
 }
