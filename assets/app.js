@@ -99,31 +99,41 @@
   // Full-size pictures for the lightbox: "full" when the card shows a crop, else the picture itself.
   function fullUrls(c) { return artsOf(c).map(function (a) { return a.full || artSrc(c, a); }); }
 
-  // ---------- lightbox: a picture full screen, with arrows, swipe and a counter ----------
+  // ---------- lightbox: pictures or clips, big, with arrows, swipe and a counter ----------
+  // items: picture URLs (strings) or clip objects ({src} or {youtube}, with a title).
   var lbOpen = false;
-  function openLightbox(urls, start, alt) {
-    if (!urls.length || lbOpen) return;
+  function openLightbox(items, start, alt) {
+    if (!items.length || lbOpen) return;
     lbOpen = true;
-    var idx = start || 0, n = urls.length, pausedHere = false;
+    var idx = start || 0, n = items.length, pausedHere = false;
     if (S.open && !S.paused) { togglePause(); pausedHere = true; }
     var opener = document.activeElement;
-    var img = h("img", { class: "lb-img", alt: "" });
+    var stage = h("div", { class: "lb-stage" });
     var count = h("div", { class: "lb-count", "aria-live": "polite" });
     function show() {
-      img.src = urls[idx];
-      img.alt = (alt || "Picture") + (n > 1 ? ", " + (idx + 1) + " of " + n : "");
-      count.textContent = n > 1 ? (idx + 1) + " / " + n : "";
+      var it = items[idx], label = n > 1 ? (idx + 1) + " / " + n : "";
+      stage.innerHTML = ""; // removing a playing clip stops it
+      if (typeof it === "string") {
+        stage.append(h("img", { class: "lb-img", src: it, alt: (alt || "Picture") + (n > 1 ? ", " + (idx + 1) + " of " + n : "") }));
+      } else {
+        var yt = it.youtube ? youtubeId(it.youtube) : null;
+        stage.append(yt
+          ? h("iframe", { class: "lb-yt", src: "https://www.youtube-nocookie.com/embed/" + yt + "?autoplay=1", title: it.title || "Clip", allow: "autoplay; encrypted-media; picture-in-picture; fullscreen", allowfullscreen: true })
+          : h("video", { class: "lb-video", src: it.src, controls: true, autoplay: true, playsinline: true }));
+        label = (label ? label + " · " : "") + (it.title || "Untitled clip");
+      }
+      count.textContent = label;
     }
     function go(d) { idx = (idx + d + n) % n; show(); }
     var closeBtn = h("button", { class: "icon-btn lb-close", type: "button", "aria-label": "Close picture", onclick: close }, "✕");
     var box = h("div", { class: "lightbox", role: "dialog", "aria-modal": "true", "aria-label": alt || "Picture", tabindex: "-1",
       onclick: function (e) { if (e.target === box) close(); } },
-      img,
+      stage,
       n > 1 ? h("button", { class: "lb-arrow prev", type: "button", "aria-label": "Previous picture", onclick: function (e) { e.stopPropagation(); go(-1); } }, "‹") : null,
       n > 1 ? h("button", { class: "lb-arrow next", type: "button", "aria-label": "Next picture", onclick: function (e) { e.stopPropagation(); go(1); } }, "›") : null,
       closeBtn, count);
     var sx = null, sy = 0;
-    box.addEventListener("pointerdown", function (e) { sx = e.clientX; sy = e.clientY; });
+    box.addEventListener("pointerdown", function (e) { sx = /^(VIDEO|IFRAME)$/.test(e.target.tagName) ? null : e.clientX; sy = e.clientY; });
     box.addEventListener("pointerup", function (e) {
       if (sx == null || n < 2) { sx = null; return; }
       var dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
@@ -375,13 +385,16 @@
     var m = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([A-Za-z0-9_-]{6,})/.exec(String(v || ""));
     return m ? m[1] : (/^[A-Za-z0-9_-]{6,}$/.test(String(v || "")) ? v : null);
   }
-  function clipEl(clip) {
+  // A clip on the Memories slide: a thumbnail with a play button; tapping it opens the clip big.
+  function clipEl(clip, i, all) {
     var yt = clip.youtube ? youtubeId(clip.youtube) : null;
-    var media = yt
-      ? h("iframe", { src: "https://www.youtube-nocookie.com/embed/" + yt, title: clip.title || "Clip", allow: "encrypted-media; picture-in-picture; fullscreen", allowfullscreen: true, loading: "lazy" })
-      : h("video", { src: clip.src, controls: true, playsinline: true, preload: "metadata" });
-    return h("figure", { class: "clip" }, media,
-      h("figcaption", null, h("b", { text: clip.title || "Untitled clip" }), clip.dur ? h("span", { text: clipTime(clip.dur) }) : null));
+    var thumb = yt
+      ? h("img", { src: "https://i.ytimg.com/vi/" + yt + "/hqdefault.jpg", alt: "" })
+      : h("video", { src: clip.src + "#t=0.5", muted: true, playsinline: true, preload: "metadata", tabindex: "-1", "aria-hidden": "true" });
+    return h("button", { class: "clip", type: "button", "aria-label": "Play " + (clip.title || "clip") + " full size",
+      onclick: function () { openLightbox(all, i, "Clips"); } },
+      h("span", { class: "clip-thumb" }, thumb, h("span", { class: "clip-play", "aria-hidden": "true" }, "▶")),
+      h("span", { class: "clip-cap" }, h("b", { text: clip.title || "Untitled clip" }), clip.dur ? h("span", { text: clipTime(clip.dur) }) : null));
   }
   function slidesFor(c) {
     var st = stats(c), out = [], urls = artUrls(c);

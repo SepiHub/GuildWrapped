@@ -268,3 +268,16 @@ textarea.out { min-height: 180px; color: var(--text); }
 .lb-arrow.next { right: max(14px, env(safe-area-inset-right, 0px)); }
 .lb-close { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); width: 40px; height: 40px; }
 .lb-count { position: absolute; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+
+/* Clips: thumbnails on the Memories slide that open big in the lightbox */
+.clip { display: grid; gap: 6px; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.clip-thumb { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; border: 1px solid var(--t-edge); background: var(--night); }
+.clip-thumb video, .clip-thumb img { display: block; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; border: 0; border-radius: 0; pointer-events: none; }
+.clip-play { position: absolute; inset: 0; margin: auto; width: 56px; height: 56px; display: grid; place-items: center; padding-left: 4px; border-radius: 50%; border: 2px solid var(--a1); background: var(--t-shade-mid); color: var(--text); font-size: 20px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45); transition: transform 0.15s ease; }
+.clip:hover .clip-play { transform: scale(1.08); }
+.clip:focus-visible { outline: 2px solid var(--a1); outline-offset: 3px; border-radius: 14px; }
+.clip-cap { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; }
+.clip-cap span { color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; flex: none; }
+.lb-stage { width: 100%; height: 100%; display: grid; place-items: center; min-height: 0; }
+.lb-video { width: 100%; height: 100%; object-fit: contain; border-radius: 12px; outline: none; }
+.lb-yt { width: min(100%, calc((100vh - 140px) * 16 / 9)); aspect-ratio: 16 / 9; border: 0; border-radius: 12px; background: #000; }
