@@ -211,7 +211,12 @@
 
   // ---------- story ----------
   var S = { open: false, list: [], ci: 0, si: 0, slides: [], elapsed: 0, last: 0, paused: false, raf: 0 };
-  var storyEl, frameEl, bgEl, barsEl, avEl, whoName, whoPos, hostEl, prevCharBtn, nextCharBtn, pauseBtn;
+  var storyEl, frameEl, bgEl, barsEl, avEl, whoName, whoPos, hostEl, prevCharBtn, nextCharBtn, pauseBtn, sideArrows, footArrows;
+  function arrowPair(cls) {
+    return h("div", { class: cls },
+      h("button", { class: "slide-arrow prev", type: "button", "aria-label": "Previous slide", onclick: function () { step(-1); } }, "‹"),
+      h("button", { class: "slide-arrow next", type: "button", "aria-label": "Next slide", onclick: function () { step(1); } }, "›"));
+  }
   function buildStoryShell() {
     bgEl = h("img", { class: "story-bg", alt: "" });
     barsEl = h("div", { class: "bars", "aria-hidden": "true" });
@@ -226,8 +231,9 @@
       h("div", { class: "story-head" }, avEl, h("div", { class: "who" }, whoName, whoPos), pauseBtn,
         h("button", { class: "icon-btn", type: "button", "aria-label": "Close", onclick: closeStory }, "✕")),
       hostEl,
-      h("div", { class: "story-foot" }, prevCharBtn, nextCharBtn));
-    storyEl = h("div", { class: "story", role: "dialog", "aria-modal": "true", "aria-label": "Guild Wrapped story", hidden: true }, bgEl, frameEl);
+      h("div", { class: "story-foot" }, prevCharBtn, h("span", { class: "spacer" }), footArrows = arrowPair("foot-arrows"), h("span", { class: "spacer" }), nextCharBtn));
+    sideArrows = arrowPair("side-arrows");
+    storyEl = h("div", { class: "story", role: "dialog", "aria-modal": "true", "aria-label": "Guild Wrapped story", hidden: true }, bgEl, frameEl, sideArrows);
     document.body.append(storyEl);
     document.addEventListener("keydown", function (e) {
       if (!S.open) return;
@@ -357,6 +363,7 @@
     var url = artUrl(c);
     bgEl.src = url; avEl.src = url;
     frameEl.className = "frame t-" + themeKey(c);
+    storyEl.className = "story t-" + themeKey(c); // so the side arrows outside the frame get the theme too
     whoName.textContent = fullName(c);
     var prev = S.list[i - 1], next = S.list[i + 1];
     prevCharBtn.hidden = !prev; nextCharBtn.hidden = !next;
@@ -389,6 +396,11 @@
     S.elapsed = 0; S.last = performance.now();
     cancelAnimationFrame(S.raf); S.raf = requestAnimationFrame(tick);
     pauseBtn.hidden = !!sl.opts.noAuto;
+    var atStart = S.ci === 0 && S.si === 0, atEnd = S.ci === S.list.length - 1 && S.si === S.slides.length - 1;
+    [sideArrows, footArrows].forEach(function (pair) {
+      pair.querySelector(".prev").disabled = atStart;
+      pair.querySelector(".next").disabled = atEnd;
+    });
   }
   function tick(now) {
     if (!S.open) return;
