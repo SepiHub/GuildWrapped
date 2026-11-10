@@ -9,7 +9,13 @@
           "src": "art/evil-bobby-1.jpg"
         }
       ],
-      "clips": [],
+      "clips": [
+        {
+          "title": "Bridge dive",
+          "src": "clips/evil-bobby-1.mp4",
+          "dur": 15
+        }
+      ],
       "added": 1794302000,
       "name": "Evil",
       "sn": "Bobby",
