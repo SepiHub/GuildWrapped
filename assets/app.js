@@ -2,6 +2,9 @@
 (function () {
   "use strict";
 
+  // Site version, shown at the bottom right. Bump it with every site change (see CHANGELOG.md), and use the same
+  // value for the ?v= stamps on style.css and app.js in index.html.
+  var SITE_VERSION = "1.0.0";
   var DATA = { v: 1, chars: [] };
   var MAX_ARTS = 6, SLIDE_MS = 6500;
   var YEAR = new Date().getFullYear();
@@ -355,7 +358,8 @@
       gridEl,
       h("footer", { class: "foot-links" },
         h("a", { href: "#builder" }, "Make an entry (for whoever adds characters)"),
-        h("a", { href: "https://github.com/SepiHub/GuildWrapped" }, "Source on GitHub"))));
+        h("a", { href: "https://github.com/SepiHub/GuildWrapped" }, "Source on GitHub"),
+        h("a", { class: "site-ver", href: "https://github.com/SepiHub/GuildWrapped/blob/main/CHANGELOG.md", title: "What changed" }, "Site v" + SITE_VERSION))));
   }
   function renderGallery() {
     var chars = DATA.chars, clips = 0;

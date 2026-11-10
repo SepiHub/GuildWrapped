@@ -311,3 +311,6 @@ select#b-mode { width: 100%; }
 .lb-img, .lb-video { max-width: min(100%, 84vw); max-height: min(100%, 84vh); }
 .lb-video { max-width: min(100%, 84vw, 1200px); }
 .lb-yt { width: min(100%, 84vw, 1200px, calc(84vh * 16 / 9)); }
+
+/* Site version, bottom right of the footer */
+.foot-links .site-ver { margin-left: auto; font-variant-numeric: tabular-nums; text-decoration: none; }

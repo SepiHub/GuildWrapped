@@ -17,6 +17,7 @@ view it.
 | `data/characters.json` | The character list; the site reads it on load |
 | `art/` | Character pictures |
 | `clips/` | Video clips (MP4 or WebM, 2 minutes at most) |
+| `CHANGELOG.md` | What changed in each site version (shown at the bottom right of the page) |
 | `artifact/guild-wrapped.html` | The earlier single-file Claude artifact version, kept for reference |
 
 ## Adding a character
