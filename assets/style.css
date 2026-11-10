@@ -281,3 +281,18 @@ textarea.out { min-height: 180px; color: var(--text); }
 .lb-stage { width: 100%; height: 100%; display: grid; place-items: center; min-height: 0; }
 .lb-video { width: 100%; height: 100%; object-fit: contain; border-radius: 12px; outline: none; }
 .lb-yt { width: min(100%, calc((100vh - 140px) * 16 / 9)); aspect-ratio: 16 / 9; border: 0; border-radius: 12px; background: #000; }
+
+/* Lightbox sizing: the picture or clip always fits inside the screen, leaving room for the close button, the arrows
+   and the caption, and clips stop at a comfortable size on big screens. */
+.lightbox { display: block; }
+.lb-stage { position: absolute; width: auto; height: auto;
+  top: calc(64px + env(safe-area-inset-top, 0px)); bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+  left: max(78px, env(safe-area-inset-left, 0px)); right: max(78px, env(safe-area-inset-right, 0px));
+  display: flex; align-items: center; justify-content: center; }
+.lb-img, .lb-video { width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
+.lb-video { max-width: min(100%, 1100px); background: #000; }
+.lb-yt { width: min(100%, 1100px, calc((100vh - 130px) * 16 / 9)); height: auto; }
+@media (max-width: 640px) {
+  .lb-stage { left: max(10px, env(safe-area-inset-left, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); }
+  .lb-arrow { top: auto; bottom: calc(6px + env(safe-area-inset-bottom, 0px)); margin-top: 0; width: 40px; height: 40px; font-size: 26px; }
+}
