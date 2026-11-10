@@ -6,7 +6,8 @@
       "theme": "fiery",
       "arts": [
         {
-          "src": "art/evil-bobby-1.jpg"
+          "src": "art/evil-bobby-1.jpg",
+          "full": "art/full/evil-bobby-1.jpg"
         }
       ],
       "clips": [
@@ -79,7 +80,8 @@
       "theme": "grove",
       "arts": [
         {
-          "src": "art/pets-fault-2.jpg"
+          "src": "art/pets-fault-2.jpg",
+          "full": "art/full/pets-fault-2.jpg"
         }
       ],
       "clips": [],
@@ -141,13 +143,16 @@
       "theme": "grove",
       "arts": [
         {
-          "src": "art/may-die-1.jpg"
+          "src": "art/may-die-1.jpg",
+          "full": "art/full/may-die-1.jpg"
         },
         {
-          "src": "art/may-die-2.jpg"
+          "src": "art/may-die-2.jpg",
+          "full": "art/full/may-die-2.jpg"
         },
         {
-          "src": "art/may-die-3.jpg"
+          "src": "art/may-die-3.jpg",
+          "full": "art/full/may-die-3.jpg"
         }
       ],
       "clips": [

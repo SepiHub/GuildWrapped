@@ -50,7 +50,9 @@ Then whoever adds characters:
 ```
 
 - `theme`: `guild` (default), `fiery`, `twilight`, `medieval`, `cute`, `frost`, `grove`, `arcane`, `fel`, `celestial`.
-- `arts`: the first picture is the cover; cards keep a 3:4 shape, so portrait pictures look best.
+- `arts`: the first picture is the cover; cards keep a 3:4 shape, so portrait pictures look best. When `src` is a
+  crop, add `"full": "art/full/<name>"` with the whole picture; the full-screen viewer (the ⤢ button on a card, or
+  tapping the picture in a Wrapped) shows `full` when it's there, else `src`.
 - Character fields come from the export code: `/gf export` gives `GFOA1.<crc32 hex>.<base64 of UTF-8 JSON>`; the
   builder checks the CRC32 and decodes it. `st` (shared stats) is there only when the player has stats sharing on.
 

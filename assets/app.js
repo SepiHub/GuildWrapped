@@ -96,6 +96,56 @@
   function artSrc(c, a) { return a.src ? a.src : genArt(c, a.gen); }
   function artUrls(c) { return artsOf(c).map(function (a) { return artSrc(c, a); }); }
   function artUrl(c) { return artUrls(c)[0] || ""; }
+  // Full-size pictures for the lightbox: "full" when the card shows a crop, else the picture itself.
+  function fullUrls(c) { return artsOf(c).map(function (a) { return a.full || artSrc(c, a); }); }
+
+  // ---------- lightbox: a picture full screen, with arrows, swipe and a counter ----------
+  var lbOpen = false;
+  function openLightbox(urls, start, alt) {
+    if (!urls.length || lbOpen) return;
+    lbOpen = true;
+    var idx = start || 0, n = urls.length, pausedHere = false;
+    if (S.open && !S.paused) { togglePause(); pausedHere = true; }
+    var opener = document.activeElement;
+    var img = h("img", { class: "lb-img", alt: "" });
+    var count = h("div", { class: "lb-count", "aria-live": "polite" });
+    function show() {
+      img.src = urls[idx];
+      img.alt = (alt || "Picture") + (n > 1 ? ", " + (idx + 1) + " of " + n : "");
+      count.textContent = n > 1 ? (idx + 1) + " / " + n : "";
+    }
+    function go(d) { idx = (idx + d + n) % n; show(); }
+    var closeBtn = h("button", { class: "icon-btn lb-close", type: "button", "aria-label": "Close picture", onclick: close }, "✕");
+    var box = h("div", { class: "lightbox", role: "dialog", "aria-modal": "true", "aria-label": alt || "Picture", tabindex: "-1",
+      onclick: function (e) { if (e.target === box) close(); } },
+      img,
+      n > 1 ? h("button", { class: "lb-arrow prev", type: "button", "aria-label": "Previous picture", onclick: function (e) { e.stopPropagation(); go(-1); } }, "‹") : null,
+      n > 1 ? h("button", { class: "lb-arrow next", type: "button", "aria-label": "Next picture", onclick: function (e) { e.stopPropagation(); go(1); } }, "›") : null,
+      closeBtn, count);
+    var sx = null, sy = 0;
+    box.addEventListener("pointerdown", function (e) { sx = e.clientX; sy = e.clientY; });
+    box.addEventListener("pointerup", function (e) {
+      if (sx == null || n < 2) { sx = null; return; }
+      var dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? 1 : -1);
+    });
+    function key(e) {
+      if (e.key === "Escape") { e.stopPropagation(); close(); }
+      else if (e.key === "ArrowRight" && n > 1) { e.stopPropagation(); go(1); }
+      else if (e.key === "ArrowLeft" && n > 1) { e.stopPropagation(); go(-1); }
+    }
+    function close() {
+      document.removeEventListener("keydown", key, true);
+      box.remove(); lbOpen = false;
+      if (pausedHere && S.open && S.paused) togglePause();
+      if (opener && opener.focus) opener.focus();
+    }
+    document.addEventListener("keydown", key, true);
+    document.body.append(box);
+    show();
+    closeBtn.focus();
+  }
+
   function playable() { return DATA.chars.filter(function (c) { return artUrl(c); }); }
 
   // Image carousel: arrows, dots and swipe; one image shows no controls.
@@ -126,7 +176,8 @@
       });
       gest.addEventListener("pointercancel", function () { sx = null; });
     }
-    return { el: el, go: go, wasSwipe: function () { var s = swiped; swiped = false; return s; } };
+    if (opts.onOpen) track.addEventListener("click", function () { if (swiped) { swiped = false; return; } opts.onOpen(idx); });
+    return { el: el, go: go, index: function () { return idx; }, wasSwipe: function () { var s = swiped; swiped = false; return s; } };
   }
 
   // ---------- export code (GFOA1.<crc32>.<base64 JSON>, from /gf export) ----------
@@ -235,6 +286,8 @@
     urls = urls || artUrls(c);
     var hit = mode === "play" ? h("button", { class: "card-hit", type: "button", "aria-label": "Play " + fullName(c) + "'s Guild Wrapped" }) : null;
     var car = urls.length ? carousel(urls, { still: mode !== "play", gestureEl: hit, alt: "" }) : null;
+    var zoom = mode === "play" && urls.length ? h("button", { class: "card-zoom", type: "button", "aria-label": "Show " + fullName(c) + "'s pictures full size",
+      onclick: function (e) { e.stopPropagation(); openLightbox(fullUrls(c), car ? car.index() : 0, "Art of " + fullName(c)); } }, "⤢") : null;
     if (hit) hit.addEventListener("click", function () { if (car && car.wasSwipe()) return; openStory(c.id); });
     var clips = arr(c.clips).length;
     return h("div", { class: "card t-" + themeKey(c), style: "--cc:" + ci[1] }, h("div", { class: "card-in" },
@@ -243,6 +296,7 @@
       h("span", { class: "shade" }),
       c.sample ? h("span", { class: "pill example", text: "Example" }) : null,
       clips ? h("span", { class: "pill clips", text: "▶ " + plural(clips, "clip", "clips") }) : null,
+      zoom,
       h("div", { class: "info" },
         h("div", { class: "name", text: fullName(c) }),
         h("div", { class: "orn" }),
@@ -310,7 +364,7 @@
     storyEl = h("div", { class: "story", role: "dialog", "aria-modal": "true", "aria-label": "Guild Wrapped story", hidden: true }, bgEl, frameEl, sideArrows);
     document.body.append(storyEl);
     document.addEventListener("keydown", function (e) {
-      if (!S.open) return;
+      if (!S.open || lbOpen) return;
       if (e.key === "Escape") closeStory();
       else if (e.key === "ArrowRight") step(1);
       else if (e.key === "ArrowLeft") step(-1);
@@ -332,7 +386,8 @@
   function slidesFor(c) {
     var st = stats(c), out = [], urls = artUrls(c);
     function push(kind, kids, opts) { out.push({ kind: kind, kids: kids, opts: opts || {} }); }
-    var introCar = urls.length ? carousel(urls, { alt: "Art of " + fullName(c), onMove: function () { S.elapsed = 0; } }) : null;
+    var introCar = urls.length ? carousel(urls, { alt: "Art of " + fullName(c), onMove: function () { S.elapsed = 0; },
+      onOpen: function (i) { openLightbox(fullUrls(c), i, "Art of " + fullName(c)); } }) : null;
     push("intro", [
       introCar ? h("div", { class: "intro-car" }, introCar.el) : null,
       h("div", { class: "kicker", text: "Guild Wrapped " + YEAR }),
