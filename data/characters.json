@@ -2,6 +2,54 @@
   "v": 1,
   "chars": [
     {
+      "id": "c-evil-bobby",
+      "theme": "guild",
+      "arts": [
+        {
+          "src": "art/evil-bobby-1.jpg"
+        }
+      ],
+      "clips": [],
+      "added": 1794302000,
+      "name": "Evil",
+      "sn": "Bobby",
+      "cls": "ROGUE",
+      "race": "Gnome",
+      "lvl": 38,
+      "fac": "Alliance",
+      "prof": [
+        [
+          "Mining",
+          198,
+          225
+        ],
+        [
+          "Engineering",
+          194,
+          225
+        ],
+        [
+          "First Aid",
+          225,
+          225
+        ],
+        [
+          "Fishing",
+          1,
+          75
+        ],
+        [
+          "Cooking",
+          30,
+          75
+        ]
+      ],
+      "tal": [],
+      "att": [],
+      "st": null,
+      "exported": 1794301971
+    },
+    {
       "id": "cmossbelly",
       "sample": true,
       "name": "Mossbelly",
