@@ -153,6 +153,80 @@
     };
   }
 
+
+  // ---------- theme stickers: little die-cut shapes on the card edges ----------
+  // Each shape is drawn twice: a thick white outline, then the colored shape on top.
+  var SHAPES = {
+    flame: { d: "M12 1.5c.6 3.4 4.7 5.6 4.7 10.6a4.7 4.7 0 0 1-9.4 0c0-2.6 1.4-3.6 1.9-5.9 1 1.5 2.1 2.4 2.1 4.2.6-3-.4-5.8.7-8.9z", inner: true },
+    leaf: { d: "M4 20C4 11 10 4.5 20.5 3.5 19.8 13 13.5 20 4 20z", vein: "M5.5 18.5Q11 12 18 6" },
+    star: { d: "M12 2.2l2.9 6.2 6.8.8-5 4.6 1.4 6.7L12 17.1l-6.1 3.4 1.4-6.7-5-4.6 6.8-.8z" },
+    sparkle: { d: "M12 1.5l2.2 7.3 7.3 2.2-7.3 2.2L12 20.5l-2.2-7.3L2.5 11l7.3-2.2z" },
+    moon: { d: "M16.5 3.2A9 9 0 1 0 20.8 16 7.2 7.2 0 0 1 16.5 3.2z" },
+    heart: { d: "M12 20.5S3.5 15.2 3.5 9.3A4.4 4.4 0 0 1 12 7a4.4 4.4 0 0 1 8.5 2.3c0 5.9-8.5 11.2-8.5 11.2z" },
+    paw: { d: "M12 21.2c-3.2 0-5.4-1.8-5.4-4.2 0-2.6 2.6-5.2 5.4-5.2s5.4 2.6 5.4 5.2c0 2.4-2.2 4.2-5.4 4.2zM5.3 13.2a2.2 2.7 0 1 1 0-.01zM9.1 9.4a2.2 2.8 0 1 1 0-.01zM15.1 9.4a2.2 2.8 0 1 1 0-.01zM18.9 13.2a2.2 2.7 0 1 1 0-.01z" },
+    snowflake: { stroke: "M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6M12 2.5l-2.3 2.4M12 2.5l2.3 2.4M12 21.5l-2.3-2.4M12 21.5l2.3-2.4M3.8 7.2l3.2.8M3.8 7.2l1 3.1M20.2 16.8l-3.2-.8M20.2 16.8l-1-3.1M3.8 16.8l1-3.1M3.8 16.8l3.2-.8M20.2 7.2l-1 3.1M20.2 7.2l-3.2.8" },
+    rune: { d: "M12 1.8l8.5 10.2L12 22.2 3.5 12z", mark: "M12 7.5v9M9.2 10.2l2.8 2 2.8-2" },
+    shield: { d: "M12 2.2l8 3v6.3c0 4.9-3.4 8.8-8 10.4-4.6-1.6-8-5.5-8-10.4V5.2z", mark: "M12 6.5v11M7.6 10.6h8.8" },
+    crown: { d: "M3 18.5l1.6-10 4.6 4.2L12 5.5l2.8 7.2 4.6-4.2 1.6 10z" },
+    sun: { d: "M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10z", rays: "M12 1.8v2.6M12 19.6v2.6M1.8 12h2.6M19.6 12h2.6M4.8 4.8l1.8 1.8M17.4 17.4l1.8 1.8M4.8 19.2l1.8-1.8M17.4 6.6l1.8-1.8" },
+    drop: { d: "M12 2.5C9 8 6 11 6 15a6 6 0 0 0 12 0c0-4-3-7-6-12.5z" }
+  };
+  // [shape, color, spot]; spots: tl / tr / ml / mr / bl / br around the card's edge.
+  var STICKERS = {
+    guild: [["paw", "#F9B8D4", "tl"], ["sparkle", "#FFF1A8", "tr"], ["heart", "#C9B6F2", "ml"], ["sparkle", "#A8D8F0", "br"]],
+    fiery: [["flame", "#FF5A2E", "tl"], ["flame", "#FF9A3D", "tr"], ["flame", "#FF7A45", "bl"], ["flame", "#FFB45E", "mr"]],
+    twilight: [["moon", "#C9B6F2", "tl"], ["star", "#FFF1A8", "tr"], ["sparkle", "#F4B8E8", "ml"], ["star", "#9FA8FF", "br"]],
+    medieval: [["shield", "#B98A3E", "tl"], ["crown", "#E8C77A", "tr"], ["sparkle", "#F0DDAF", "br"]],
+    cute: [["heart", "#FFB8D9", "tl"], ["paw", "#A0E7FF", "tr"], ["sparkle", "#FDFFB6", "ml"], ["heart", "#CAFFBF", "br"]],
+    frost: [["snowflake", "#9FDCFF", "tl"], ["snowflake", "#CFEFFF", "tr"], ["sparkle", "#E6F7FF", "ml"], ["snowflake", "#8FC3FF", "br"]],
+    grove: [["leaf", "#6FBF73", "tl"], ["leaf", "#A7D98A", "tr"], ["leaf", "#8FD694", "ml"], ["leaf", "#5E9E4F", "br"]],
+    arcane: [["rune", "#B47CFF", "tl"], ["sparkle", "#7AF5E1", "tr"], ["rune", "#6FD8FF", "mr"], ["sparkle", "#FF8BEA", "bl"]],
+    fel: [["flame", "#5EDB3A", "tl"], ["drop", "#6BFF9E", "tr"], ["flame", "#8AF25A", "bl"], ["sparkle", "#D4FF8A", "mr"]],
+    celestial: [["sun", "#FFD36B", "tl"], ["star", "#FFF3C4", "tr"], ["moon", "#C9D8FF", "ml"], ["star", "#F6C77A", "br"]]
+  };
+  var SPOTS = {
+    tl: "top:-20px;left:-20px;width:54px;transform:rotate(-14deg)",
+    tr: "top:-17px;right:-15px;width:42px;transform:rotate(12deg)",
+    ml: "top:38%;left:-19px;width:36px;transform:rotate(-10deg)",
+    mr: "top:44%;right:-19px;width:36px;transform:rotate(10deg)",
+    bl: "bottom:-17px;left:-16px;width:42px;transform:rotate(-8deg)",
+    br: "bottom:-17px;right:-16px;width:42px;transform:rotate(14deg)"
+  };
+  function shade(hex, f) { // lighten (f > 0) or darken (f < 0) a #RRGGBB color
+    var n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+    function m(v) { return Math.round(f > 0 ? v + (255 - v) * f : v * (1 + f)); }
+    return "#" + ((1 << 24) | (m(r) << 16) | (m(g) << 8) | m(b)).toString(16).slice(1);
+  }
+  function stickerSvg(shape, color, flip) {
+    var s = SHAPES[shape], o = "#FFFFFF", parts = [];
+    var g = flip ? '<g transform="translate(24 0) scale(-1 1)">' : "<g>";
+    if (s.stroke) {
+      parts.push('<path d="' + s.stroke + '" fill="none" stroke="' + o + '" stroke-width="5.2" stroke-linecap="round"/>');
+      parts.push('<path d="' + s.stroke + '" fill="none" stroke="' + color + '" stroke-width="2.2" stroke-linecap="round"/>');
+    } else {
+      if (s.rays) parts.push('<path d="' + s.rays + '" fill="none" stroke="' + o + '" stroke-width="5" stroke-linecap="round"/>');
+      parts.push('<path d="' + s.d + '" fill="' + o + '" stroke="' + o + '" stroke-width="3.4" stroke-linejoin="round"/>');
+      if (s.rays) parts.push('<path d="' + s.rays + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round"/>');
+      parts.push('<path d="' + s.d + '" fill="' + color + '"/>');
+      if (s.inner) parts.push('<path d="' + s.d + '" fill="' + shade(color, 0.55) + '" transform="translate(12 19) scale(.5) translate(-12 -19)"/>');
+      if (s.vein) parts.push('<path d="' + s.vein + '" fill="none" stroke="' + shade(color, -0.35) + '" stroke-width="1.3" stroke-linecap="round"/>');
+      if (s.mark) parts.push('<path d="' + s.mark + '" fill="none" stroke="' + shade(color, -0.45) + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>');
+    }
+    return '<svg viewBox="-2 -2 28 28" aria-hidden="true">' + g + parts.join("") + "</g></svg>";
+  }
+  function stickersFor(theme) {
+    return (STICKERS[theme] || []).map(function (st, i) {
+      var el = h("span", { class: "sticker", style: SPOTS[st[2]] });
+      el.innerHTML = stickerSvg(st[0], st[1], st[0] === "leaf" && (st[2] === "tr" || st[2] === "mr" || st[2] === "br"));
+      return el;
+    });
+  }
+  function themeIcon(theme) {
+    var st = (STICKERS[theme] || [])[0], el = h("span", { class: "theme-ico" });
+    if (st) el.innerHTML = stickerSvg(st[0], st[1], false);
+    return el;
+  }
+
   // ---------- gallery ----------
   var root = document.getElementById("root"), gridEl, countEl;
   // mode: "play" (gallery card that opens the story), "still" (outro, builder preview). urls overrides the art.
@@ -163,7 +237,7 @@
     var car = urls.length ? carousel(urls, { still: mode !== "play", gestureEl: hit, alt: "" }) : null;
     if (hit) hit.addEventListener("click", function () { if (car && car.wasSwipe()) return; openStory(c.id); });
     var clips = arr(c.clips).length;
-    return h("div", { class: "card t-" + themeKey(c), style: "--cc:" + ci[1] },
+    return h("div", { class: "card t-" + themeKey(c), style: "--cc:" + ci[1] }, h("div", { class: "card-in" },
       car ? car.el : null,
       h("span", { class: "tint" }),
       h("span", { class: "shade" }),
@@ -174,7 +248,7 @@
         h("div", { class: "orn" }),
         h("div", { class: "sub" }, h("i", { class: "dot" }), h("span", { class: "lvl", text: c.lvl ? "Lv " + c.lvl : "Lv ?" }), h("span", { text: [c.race, ci[0]].filter(Boolean).join(" ") })),
         mainProfs(c).length ? h("div", { class: "profs" }, mainProfs(c).map(function (p) { return h("span", { text: p[0] }); })) : null),
-      hit);
+      hit), stickersFor(themeKey(c)));
   }
   function renderShell() {
     var eyebrow = h("div", { class: "eyebrow-row" }); eyebrow.innerHTML = PAW; eyebrow.append("Gay Furries of Azeroth");
@@ -449,7 +523,7 @@
         h("li", null, "Optional: up to 6 pictures in total, a card theme, and up to 3 clips of 2 minutes or less (a YouTube link works great).")),
       h("div", { class: "field" }, h("div", { class: "lbl", text: "Themes to pick from" }),
         h("div", { class: "themes" }, THEMES.map(function (t) {
-          return h("div", { class: "theme-opt t-" + t[0] }, h("span", { class: "sw" }), h("b", { text: t[1] }), h("span", { text: t[2] }));
+          return h("div", { class: "theme-opt t-" + t[0] }, h("span", { class: "sw" }), h("b", null, themeIcon(t[0]), t[1]), h("span", { text: t[2] }));
         }))),
       h("p", { class: "hint", text: "Your card shows up here once it's been added to the site." }),
       h("div", { class: "actions" }, closeBtn())));
@@ -489,7 +563,7 @@
         B.theme = t[0];
         [].forEach.call(themesBox.children, function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-k") === B.theme ? "true" : "false"); });
         refresh();
-      } }, h("span", { class: "sw" }), h("b", { text: t[1] }), h("span", { text: t[2] }));
+      } }, h("span", { class: "sw" }), h("b", null, themeIcon(t[0]), t[1]), h("span", { text: t[2] }));
     }));
     var out = h("textarea", { id: "b-out", readonly: true, class: "out", "aria-label": "Entry for data/characters.json" });
     var copyBtn = h("button", { class: "btn primary", type: "button", onclick: function () {
