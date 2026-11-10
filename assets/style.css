@@ -296,3 +296,8 @@ textarea.out { min-height: 180px; color: var(--text); }
   .lb-stage { left: max(10px, env(safe-area-inset-left, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); }
   .lb-arrow { top: auto; bottom: calc(6px + env(safe-area-inset-bottom, 0px)); margin-top: 0; width: 40px; height: 40px; font-size: 26px; }
 }
+
+/* Versions */
+.ver-select { justify-self: start; max-width: 100%; margin-top: 3px; padding: 2px 8px; border-radius: 8px; border: 1px solid var(--t-edge); background: var(--t-chip); color: var(--text); font-size: 12px; font-weight: 600; }
+.profs .ver { border-style: dashed; color: var(--muted); }
+select#b-mode { width: 100%; }

@@ -99,6 +99,27 @@
   // Full-size pictures for the lightbox: "full" when the card shows a crop, else the picture itself.
   function fullUrls(c) { return artsOf(c).map(function (a) { return a.full || artSrc(c, a); }); }
 
+  // ---------- versions: every update keeps the character as it was, as a dated snapshot ----------
+  // c.versions holds older snapshots; the character itself is the latest. A snapshot has these keys:
+  var SNAP_KEYS = ["lvl", "race", "fac", "prof", "tal", "att", "st", "arts", "clips", "theme", "exported"];
+  function snapshot(c) { var s = {}; SNAP_KEYS.forEach(function (k) { if (c[k] !== undefined) s[k] = c[k]; }); return s; }
+  // Newest first: [{ key, t, latest, c }], where c is the whole character as it was at that time.
+  function versionsOf(c) {
+    var out = [{ key: "latest", t: c.exported || c.added || 0, latest: true, c: c }];
+    arr(c.versions).forEach(function (v) {
+      if (!v || typeof v !== "object") return;
+      var then = Object.assign({}, c, { clips: [], st: null }, v);
+      delete then.versions;
+      out.push({ key: "v" + (v.exported || 0), t: v.exported || 0, latest: false, c: then });
+    });
+    var rest = out.slice(1).sort(function (a, b) { return b.t - a.t; });
+    return [out[0]].concat(rest);
+  }
+  function verDate(t) {
+    return t ? new Date(t * 1000).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "Unknown date";
+  }
+  function verLabel(v) { return (v.latest ? "Latest · " : "") + verDate(v.t) + " · Lv " + (v.c.lvl || "?"); }
+
   // ---------- lightbox: pictures or clips, big, with arrows, swipe and a counter ----------
   // items: picture URLs (strings) or clip objects ({src} or {youtube}, with a title).
   var lbOpen = false;
@@ -311,7 +332,9 @@
         h("div", { class: "name", text: fullName(c) }),
         h("div", { class: "orn" }),
         h("div", { class: "sub" }, h("i", { class: "dot" }), h("span", { class: "lvl", text: c.lvl ? "Lv " + c.lvl : "Lv ?" }), h("span", { text: [c.race, ci[0]].filter(Boolean).join(" ") })),
-        mainProfs(c).length ? h("div", { class: "profs" }, mainProfs(c).map(function (p) { return h("span", { text: p[0] }); })) : null),
+        (mainProfs(c).length || arr(c.versions).length) ? h("div", { class: "profs" },
+          mainProfs(c).map(function (p) { return h("span", { text: p[0] }); }),
+          arr(c.versions).length ? h("span", { class: "ver", text: plural(arr(c.versions).length + 1, "version", "versions") }) : null) : null),
       hit), stickersFor(themeKey(c)));
   }
   function renderShell() {
@@ -348,7 +371,8 @@
   }
 
   // ---------- story ----------
-  var S = { open: false, list: [], ci: 0, si: 0, slides: [], elapsed: 0, last: 0, paused: false, raf: 0 };
+  var S = { ver: {}, open: false, list: [], ci: 0, si: 0, slides: [], elapsed: 0, last: 0, paused: false, raf: 0 };
+  var verSel;
   var storyEl, frameEl, bgEl, barsEl, avEl, whoName, whoPos, hostEl, prevCharBtn, nextCharBtn, pauseBtn, sideArrows, footArrows;
   function arrowPair(cls) {
     return h("div", { class: cls },
@@ -360,13 +384,18 @@
     barsEl = h("div", { class: "bars", "aria-hidden": "true" });
     avEl = h("img", { class: "av", alt: "" });
     whoName = h("b"); whoPos = h("small");
+    verSel = h("select", { class: "ver-select", "aria-label": "Version of this character", onchange: function () {
+      var base = S.list[S.ci]; if (!base) return;
+      S.ver[base.id] = verSel.value;
+      goChar(S.ci, true);
+    } });
     pauseBtn = h("button", { class: "icon-btn", type: "button", "aria-label": "Pause", onclick: togglePause }, "❚❚");
     hostEl = h("div", { class: "host", "aria-live": "polite" });
     prevCharBtn = h("button", { class: "btn ghost", type: "button", onclick: function () { goChar(S.ci - 1); } });
     nextCharBtn = h("button", { class: "btn", type: "button", onclick: function () { goChar(S.ci + 1); } });
     frameEl = h("div", { class: "frame" },
       barsEl,
-      h("div", { class: "story-head" }, avEl, h("div", { class: "who" }, whoName, whoPos), pauseBtn,
+      h("div", { class: "story-head" }, avEl, h("div", { class: "who" }, whoName, whoPos, verSel), pauseBtn,
         h("button", { class: "icon-btn", type: "button", "aria-label": "Close", onclick: closeStory }, "✕")),
       hostEl,
       h("div", { class: "story-foot" }, prevCharBtn, h("span", { class: "spacer" }), footArrows = arrowPair("foot-arrows"), h("span", { class: "spacer" }), nextCharBtn));
@@ -396,7 +425,7 @@
       h("span", { class: "clip-thumb" }, thumb, h("span", { class: "clip-play", "aria-hidden": "true" }, "▶")),
       h("span", { class: "clip-cap" }, h("b", { text: clip.title || "Untitled clip" }), clip.dur ? h("span", { text: clipTime(clip.dur) }) : null));
   }
-  function slidesFor(c) {
+  function slidesFor(c, prevV) {
     var st = stats(c), out = [], urls = artUrls(c);
     function push(kind, kids, opts) { out.push({ kind: kind, kids: kids, opts: opts || {} }); }
     var introCar = urls.length ? carousel(urls, { alt: "Art of " + fullName(c), onMove: function () { S.elapsed = 0; },
@@ -408,6 +437,20 @@
       h("div", { class: "line", text: metaLine(c) + (c.fac ? " · " + c.fac : "") }),
       st ? null : h("div", { class: "line", text: "Stats sharing is off for this character, so this Wrapped is short. In game: /gf stats share on, then /gf export." })
     ]);
+    if (prevV) { // "Since last time": growth since the previous version
+      var ps = stats(prevV.c), rows = [], dl = num(c.lvl) - num(prevV.c.lvl);
+      if (dl > 0) rows.push(["+" + dl, dl === 1 ? "level" : "levels"]);
+      if (st && ps) [["kills", "mobs"], ["quests", "quests"], ["dungeons", "dungeons"], ["bosses", "bosses"], ["epics", "epics"], ["deaths", "deaths"]].forEach(function (k) {
+        var d = num(st[k[0]]) - num(ps[k[0]]);
+        if (d > 0) rows.push(["+" + fmt(d), k[1]]);
+      });
+      if (!ps && st) rows.push(["New", "stats tracked"]);
+      if (rows.length) push("growth", [
+        h("div", { class: "kicker", text: "Since last time" }),
+        h("div", { class: "cap", text: "Since " + verDate(prevV.t) }),
+        h("div", { class: "quad" }, rows.slice(0, 6).map(function (r) { return h("div", null, h("b", { text: r[0] }), h("span", { text: r[1] })); }))
+      ]);
+    }
     if (st && (num(st.kills) || num(st.quests))) push("grind", [
       h("div", { class: "kicker", text: "The grind" }),
       h("div", { class: "big", text: fmt(st.kills) }),
@@ -500,8 +543,15 @@
   function goChar(i, fresh) {
     if (i < 0) i = 0;
     if (i >= S.list.length) { closeStory(); return; }
-    S.ci = i; var c = S.list[i];
-    S.slides = slidesFor(c); S.si = 0;
+    S.ci = i;
+    var base = S.list[i], vs = versionsOf(base);
+    var cur = vs.filter(function (v) { return v.key === S.ver[base.id]; })[0] || vs[0];
+    var c = cur.c;
+    verSel.innerHTML = "";
+    vs.forEach(function (v) { verSel.append(h("option", { value: v.key, text: verLabel(v) })); });
+    verSel.value = cur.key;
+    verSel.hidden = vs.length < 2;
+    S.slides = slidesFor(c, cur.latest && vs[1] ? vs[1] : null); S.si = 0;
     var url = artUrl(c);
     bgEl.src = url; avEl.src = url;
     frameEl.className = "frame t-" + themeKey(c);
@@ -514,7 +564,7 @@
     if (next) nextCharBtn.append(h("span", { text: next.name }), " →");
     barsEl.innerHTML = "";
     S.slides.forEach(function () { barsEl.append(h("div", { class: "bar" }, h("i"))); });
-    if (!fresh) location.hash = "c-" + c.id;
+    if (!fresh) location.hash = "c-" + base.id;
     showSlide();
   }
   function stopMedia() {
@@ -599,7 +649,18 @@
 
   // Entry builder: paste an export code, pick pictures and a theme, copy the JSON for data/characters.json.
   function openBuilder() {
-    var B = { decoded: null, pick: 0, theme: "guild", files: [], clips: "" };
+    var B = { decoded: null, pick: 0, theme: "guild", files: [], clips: "", base: null };
+    // New character, or an update of one already on the site (its current version is kept as a snapshot).
+    var modeSel = h("select", { id: "b-mode", onchange: function () {
+      B.base = DATA.chars.filter(function (c) { return c.id === modeSel.value; })[0] || null;
+      if (B.base) {
+        B.theme = themeKey(B.base);
+        [].forEach.call(themesBox.children, function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-k") === B.theme ? "true" : "false"); });
+      }
+      refresh();
+    } }, h("option", { value: "", text: "Add a new character" }),
+      DATA.chars.map(function (c) { return h("option", { value: c.id, text: "Update " + fullName(c) + " (keeps the current version)" }); }));
+    var modeNote = h("div", { class: "status" });
     var status = h("div", { class: "status", "aria-live": "polite" });
     var pickWrap = h("div");
     var code = h("textarea", { id: "b-code", spellcheck: "false", placeholder: "GFOA1.…", oninput: function () {
@@ -646,12 +707,22 @@
       if (!B.decoded) return null;
       var e = B.decoded.chars[B.pick] || B.decoded.chars[0];
       var base = fromExport(e, B.decoded.t), sl = slug(base.name + (base.sn ? "-" + base.sn : ""));
-      var arts = B.files.map(function (f, i) { return { src: "art/" + sl + "-" + (i + 1) + (f.name.match(/\.[a-z0-9]+$/i) || [".jpg"])[0].toLowerCase() }; });
+      var stamp = B.base ? "-" + new Date((B.decoded.t || Date.now() / 1000) * 1000).toISOString().slice(0, 10) : "";
+      var arts = B.files.map(function (f, i) { return { src: "art/" + sl + stamp + "-" + (i + 1) + (f.name.match(/\.[a-z0-9]+$/i) || [".jpg"])[0].toLowerCase() }; });
       var clips = B.clips.split("\n").map(function (line) {
         var parts = line.split("|"), title = parts.length > 1 ? parts[0].trim() : "", ref = (parts.length > 1 ? parts.slice(1).join("|") : parts[0]).trim();
         if (!ref) return null;
         return youtubeId(ref) && !/\.(mp4|webm)$/i.test(ref) ? { title: title, youtube: ref } : { title: title, src: ref };
       }).filter(Boolean).slice(0, 3);
+      if (B.base) { // update: new pictures and clips go first; the current version becomes a snapshot
+        var old = B.base;
+        return Object.assign({}, old, base, {
+          id: old.id, added: old.added, theme: B.theme,
+          arts: arts.concat(arr(old.arts)).slice(0, MAX_ARTS),
+          clips: clips.concat(arr(old.clips)).slice(0, 3),
+          versions: [snapshot(old)].concat(arr(old.versions))
+        });
+      }
       return Object.assign({ id: "c-" + sl, theme: B.theme, arts: arts, clips: clips, added: Math.floor(Date.now() / 1000) }, base);
     }
     function refresh() {
@@ -660,8 +731,17 @@
       var c = e || { name: "New character", theme: B.theme };
       c = Object.assign({}, c, { theme: B.theme });
       prevBox.innerHTML = "";
-      prevBox.append(cardEl(c, "still", B.files.map(function (f) { return f.url; })));
-      fileList.textContent = e && e.arts.length
+      prevBox.append(cardEl(c, "still", B.files.map(function (f) { return f.url; }).concat(e && B.base ? artUrls(Object.assign({}, B.base, { arts: arr(B.base.arts) })) : []).slice(0, MAX_ARTS)));
+      modeNote.className = "status";
+      modeNote.textContent = "";
+      if (B.base && B.decoded) {
+        var picked = B.decoded.chars[B.pick] || B.decoded.chars[0];
+        if (picked.n !== B.base.name) { modeNote.className = "status err"; modeNote.textContent = "This code is for " + picked.n + ", not " + B.base.name + ". Check you picked the right character."; }
+        else { modeNote.className = "status ok"; modeNote.textContent = "Their current version (" + verDate(B.base.exported || B.base.added) + ") will be kept, and can still be viewed on the site."; }
+      }
+      fileList.textContent = B.base
+        ? (e && B.files.length ? "New pictures go first. Save them in the art folder as: " + e.arts.slice(0, B.files.length).map(function (a) { return a.src.replace("art/", ""); }).join(", ") : "Optional when updating: new pictures go in front of the current ones.")
+        : e && e.arts.length
         ? "Save the pictures in the art folder as: " + e.arts.map(function (a) { return a.src.replace("art/", ""); }).join(", ")
         : "Pick at least one picture. The site needs one to show the card.";
     }
@@ -669,13 +749,14 @@
     openModal("Make an entry", h("div", { class: "sheet" },
       h("h2", { text: "Make an entry" }),
       h("p", { class: "hint", text: "For whoever adds characters to the site. Nothing here is uploaded: this builds the text to add to data/characters.json, and tells you what to name the pictures." }),
+      h("div", { class: "field" }, h("label", { class: "lbl", for: "b-mode", text: "What are you doing?" }), modeSel, modeNote),
       h("div", { class: "field" }, h("label", { class: "lbl", for: "b-code", text: "Export code (required)" }), code, status, pickWrap),
       h("div", { class: "field" }, h("label", { class: "lbl", for: "b-art", text: "Pictures (at least 1, up to " + MAX_ARTS + "; the first is the cover)" }), fileInput, fileList),
       h("div", { class: "field" }, h("div", { class: "lbl", text: "Card theme" }), h("div", { class: "look" }, prevBox, themesBox)),
       h("div", { class: "field" }, h("label", { class: "lbl", for: "b-clips", text: "Clips (optional, up to 3)" }),
         h("div", { class: "hint", text: "YouTube links play right in the Wrapped. Video files go in the clips folder (MP4 or WebM, 2 minutes at most)." }), clipsInput),
       h("div", { class: "field" }, h("label", { class: "lbl", for: "b-out", text: "Entry" }),
-        h("div", { class: "hint", text: "Add it to the chars list in data/characters.json (with a comma between entries), add the pictures to art/, and push. The site updates within a couple of minutes." }), out),
+        h("div", { class: "hint", text: "New character: add it to the chars list in data/characters.json (with a comma between entries). Update: replace that character's whole entry with this one. Then add any pictures to art/ and push; the site updates within a couple of minutes." }), out),
       h("div", { class: "actions" }, closeBtn(), copyBtn)));
     refresh();
   }

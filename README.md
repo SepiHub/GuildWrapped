@@ -56,6 +56,21 @@ Then whoever adds characters:
 - Character fields come from the export code: `/gf export` gives `GFOA1.<crc32 hex>.<base64 of UTF-8 JSON>`; the
   builder checks the CRC32 and decodes it. `st` (shared stats) is there only when the player has stats sharing on.
 
+## Versions (updating a character)
+
+Updating never throws the old character away. The entry itself is the **latest** version, and `versions` holds
+older snapshots, newest first. Each snapshot keeps `lvl`, `race`, `fac`, `prof`, `tal`, `att`, `st`, `arts`, `clips`,
+`theme` and `exported` (the export's time), so an old version shows its own stats, pictures, clips and theme.
+
+- On the site, a character with more than one version gets a "2 versions" tag on its card and a version picker
+  under its name in the Wrapped. The latest version also gets a **Since last time** slide (levels, mobs, quests,
+  dungeons, bosses, epics and deaths gained since the previous version).
+- To update someone: open **Make an entry**, choose "Update <name>", paste their new export code, optionally add
+  new pictures, clips or a theme, and copy the entry. It already contains their current version as a snapshot:
+  replace their whole entry in `data/characters.json` with it. New pictures are named with the date
+  (`art/<name>-<yyyy-mm-dd>-1.jpg`) so they never overwrite old ones.
+- Never delete files from `art/` or `clips/` that a snapshot still points to.
+
 ## Wrapped slides
 
 Intro (picture carousel), mobs and quests, dungeons/bosses/flights/hearthstones, loot (epics, rares, first epic,
