@@ -73,6 +73,68 @@
         "v": 1
       },
       "exported": 1794302115
+    },
+    {
+      "id": "c-pets-fault",
+      "theme": "grove",
+      "arts": [
+        {
+          "src": "art/pets-fault-1.jpg"
+        }
+      ],
+      "clips": [],
+      "added": 1794304100,
+      "name": "Pets",
+      "sn": "Fault",
+      "cls": "HUNTER",
+      "race": "Night Elf",
+      "lvl": 28,
+      "fac": "Alliance",
+      "prof": [
+        [
+          "Leatherworking",
+          44,
+          75
+        ],
+        [
+          "Skinning",
+          88,
+          150
+        ],
+        [
+          "First Aid",
+          55,
+          75
+        ],
+        [
+          "Cooking",
+          8,
+          75
+        ]
+      ],
+      "tal": [],
+      "att": [],
+      "st": {
+        "bestXph": 25171,
+        "bosses": 16,
+        "deaths": 13,
+        "dungeons": 3,
+        "epics": 0,
+        "explore": 2112,
+        "fish": 0,
+        "flights": 7,
+        "hearths": 2,
+        "kills": 682,
+        "longestSession": 22415,
+        "quests": 40,
+        "rares": 6,
+        "sessions": 3,
+        "since": 1794215157,
+        "skillUps": 100,
+        "t": 1794303947,
+        "v": 1
+      },
+      "exported": 1794303960
     }
   ]
 }
